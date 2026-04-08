@@ -413,3 +413,14 @@ function InstagramTab({ content, updateContent }) {
     </div>
   );
 }
+function FasilitasTab({ content, updateContent }) {
+
+  return (
+    <div className="admin-section-card">
+      <h3>🏫 Kelola Fasilitas</h3>
+
+      <p>Fitur upload fasilitas aktif ✅</p>
+
+    </div>
+  );
+}
