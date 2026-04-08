@@ -1,343 +1,211 @@
 import { useState } from 'react';
 import { useAuth } from '../lib/auth';
 import { useSiteContent } from '../lib/content';
+import { supabase } from '../lib/supabase';
+
 import {
-  LayoutDashboard, FileText, Phone, GraduationCap, Eye, Image, 
+  LayoutDashboard, FileText, Phone, GraduationCap, Eye, Image,
   LogOut, Save, RotateCcw, Check, Settings, BarChart3, Globe
 } from 'lucide-react';
+
 import './AdminDashboard.css';
 
 const TABS = [
   { id: 'overview', label: 'Ringkasan', icon: <LayoutDashboard size={18} /> },
   { id: 'hero', label: 'Beranda / Hero', icon: <FileText size={18} /> },
-  { id: 'stats', label: 'Statistik', icon: <BarChart3 size={18} /> },
-  { id: 'visi-misi', label: 'Visi & Misi', icon: <Eye size={18} /> },
-  { id: 'contact', label: 'Kontak', icon: <Phone size={18} /> },
-  { id: 'ppdb', label: 'Info PPDB', icon: <GraduationCap size={18} /> },
-  { id: 'instagram', label: 'Instagram Posts', icon: <Image size={18} /> },
+  { id: 'visi-misi', label: 'Tentang Kami', icon: <Eye size={18} /> },
+  { id: 'ppdb', label: 'PPDB', icon: <GraduationCap size={18} /> },
 ];
 
 export default function AdminDashboard() {
   const { logout } = useAuth();
-  const { content, updateContent, resetContent } = useSiteContent();
+  const { content, updateContent } = useSiteContent();
+
   const [activeTab, setActiveTab] = useState('overview');
   const [saved, setSaved] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const showSaved = () => {
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleSave = () => {
-    // Content is auto-saved via context, this is just UX feedback
-    showSaved();
-  };
-
   return (
     <div className="admin-layout">
-      {/* Sidebar */}
-      <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <div className="admin-sidebar-header">
-          <img src="/images/logo.png" alt="Logo" className="admin-sidebar-logo" />
-          <div>
-            <h2>Admin Panel</h2>
-            <p>SMP UMAIS Bogor</p>
-          </div>
-        </div>
 
-        <nav className="admin-nav">
-          {TABS.map(tab => (
-            <button
-              key={tab.id}
-              className={`admin-nav-btn ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => { setActiveTab(tab.id); setSidebarOpen(false); }}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+      <aside className="admin-sidebar">
+        <h2>Admin Panel</h2>
 
-        <div className="admin-sidebar-footer">
-          <a href="/" target="_blank" rel="noopener noreferrer" className="admin-nav-btn">
-            <Globe size={18} />
-            Lihat Website
-          </a>
-          <button className="admin-nav-btn admin-logout" onClick={logout}>
-            <LogOut size={18} />
-            Keluar
+        {TABS.map(tab => (
+          <button key={tab.id} onClick={() => setActiveTab(tab.id)}>
+            {tab.label}
           </button>
-        </div>
+        ))}
+
+        <button onClick={logout}>Logout</button>
       </aside>
 
-      {/* Mobile toggle */}
-      <button className="admin-mobile-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
-        <Settings size={20} />
-      </button>
-
-      {/* Main Content */}
       <main className="admin-main">
-        <div className="admin-topbar">
-          <h1>{TABS.find(t => t.id === activeTab)?.label || 'Dashboard'}</h1>
-          <div className="admin-topbar-actions">
-            {saved && <span className="admin-saved-badge"><Check size={14} /> Tersimpan!</span>}
-            <button className="btn btn-outline-pink btn-sm" onClick={resetContent}>
-              <RotateCcw size={14} /> Reset Default
-            </button>
-            <button className="btn btn-primary btn-sm" onClick={handleSave}>
-              <Save size={14} /> Simpan
-            </button>
-          </div>
-        </div>
+        <h1>{activeTab}</h1>
 
-        <div className="admin-content">
-          {activeTab === 'overview' && <OverviewTab content={content} />}
-          {activeTab === 'hero' && <HeroTab content={content} updateContent={updateContent} />}
-          {activeTab === 'stats' && <StatsTab content={content} updateContent={updateContent} />}
-          {activeTab === 'visi-misi' && <VisiMisiTab content={content} updateContent={updateContent} />}
-          {activeTab === 'contact' && <ContactTab content={content} updateContent={updateContent} />}
-          {activeTab === 'ppdb' && <PPDBTab content={content} updateContent={updateContent} />}
-          {activeTab === 'instagram' && <InstagramTab content={content} updateContent={updateContent} />}
-        </div>
+        {saved && <p style={{ color: 'green' }}>Tersimpan!</p>}
+
+        {activeTab === 'overview' && <OverviewTab />}
+        {activeTab === 'hero' && <HeroTab content={content} updateContent={updateContent} showSaved={showSaved} />}
+        {activeTab === 'visi-misi' && <VisiMisiTab content={content} updateContent={updateContent} showSaved={showSaved} />}
+        {activeTab === 'ppdb' && <PPDBTab content={content} updateContent={updateContent} showSaved={showSaved} />}
       </main>
-
-      {sidebarOpen && <div className="admin-overlay" onClick={() => setSidebarOpen(false)} />}
     </div>
   );
 }
 
-/* ===== TAB COMPONENTS ===== */
+/* ===== HELPER ===== */
 
-function OverviewTab({ content }) {
-  const cards = [
-    { label: 'Alumni Berprestasi', value: content.stats.alumni, color: '#e91e63' },
-    { label: 'Tenaga Pendidik', value: content.stats.teachers, color: '#9c27b0' },
-    { label: 'Tahun Berdiri', value: content.stats.years, color: '#2196f3' },
-    { label: 'Instagram Posts', value: content.instagramPosts.length, color: '#ff5722' },
-  ];
-
+function Field({ label, children }) {
   return (
-    <div>
-      <div className="admin-stat-grid">
-        {cards.map((c, i) => (
-          <div key={i} className="admin-stat-card" style={{ borderLeftColor: c.color }}>
-            <div className="admin-stat-value">{c.value}</div>
-            <div className="admin-stat-label">{c.label}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="admin-section-card">
-        <h3>📋 Informasi</h3>
-        <ul className="admin-info-list">
-          <li><strong>Website:</strong> Aktif & terkoneksi</li>
-          <li><strong>Email:</strong> {content.contact.email}</li>
-          <li><strong>WhatsApp:</strong> {content.contact.phone}</li>
-          <li><strong>Alamat:</strong> {content.contact.address}</li>
-          <li><strong>PPDB:</strong> {content.ppdb.startDate} — {content.ppdb.endDate}</li>
-        </ul>
-      </div>
-
-      <div className="admin-section-card">
-        <h3>💡 Panduan</h3>
-        <p>Gunakan menu di samping untuk mengedit konten website. Setiap perubahan akan otomatis tersimpan dan langsung terlihat di website.</p>
-        <ul className="admin-info-list">
-          <li>Edit teks hero, statistik, dan visi-misi dari panel ini</li>
-          <li>Update informasi kontak dan PPDB</li>
-          <li>Kelola link postingan Instagram untuk tampilan Berita & Acara</li>
-          <li>Klik "Lihat Website" untuk melihat hasil perubahan Anda</li>
-        </ul>
-      </div>
+    <div style={{ marginBottom: 15 }}>
+      <label>{label}</label>
+      <div>{children}</div>
     </div>
   );
 }
 
-function FieldGroup({ label, children }) {
-  return (
-    <div className="admin-field">
-      <label className="admin-label">{label}</label>
-      {children}
-    </div>
-  );
+async function uploadImage(file) {
+  if (!file || !supabase) return null;
+
+  const fileName = Date.now() + "-" + file.name;
+
+  const { error } = await supabase.storage
+    .from("images")
+    .upload(fileName, file);
+
+  if (error) {
+    alert("Upload gagal!");
+    return null;
+  }
+
+  const { data } = supabase.storage
+    .from("images")
+    .getPublicUrl(fileName);
+
+  return data.publicUrl;
 }
 
-function HeroTab({ content, updateContent }) {
+/* ===== OVERVIEW ===== */
+
+function OverviewTab() {
+  return <p>Dashboard siap digunakan 🚀</p>;
+}
+
+/* ===== HERO ===== */
+
+function HeroTab({ content, updateContent, showSaved }) {
   const { hero } = content;
-  const update = (key, val) => updateContent('hero', prev => ({ ...prev, [key]: val }));
 
-  return (
-    <div className="admin-section-card">
-      <h3>🏠 Konten Hero Section (Beranda)</h3>
-      <FieldGroup label="Badge / Label Kecil">
-        <input className="admin-input" value={hero.badge} onChange={e => update('badge', e.target.value)} />
-      </FieldGroup>
-      <FieldGroup label="Headline Utama">
-        <input className="admin-input" value={hero.headline} onChange={e => update('headline', e.target.value)} />
-      </FieldGroup>
-      <FieldGroup label="Subtitle / Deskripsi">
-        <textarea className="admin-textarea" rows={3} value={hero.subtitle} onChange={e => update('subtitle', e.target.value)} />
-      </FieldGroup>
-    </div>
-  );
-}
-
-function StatsTab({ content, updateContent }) {
-  const { stats } = content;
-  const update = (key, val) => updateContent('stats', prev => ({ ...prev, [key]: val }));
-
-  return (
-    <div className="admin-section-card">
-      <h3>📊 Statistik Sekolah (ditampilkan di Hero)</h3>
-      <div className="admin-field-row">
-        <FieldGroup label="Alumni Berprestasi">
-          <input className="admin-input" value={stats.alumni} onChange={e => update('alumni', e.target.value)} />
-        </FieldGroup>
-        <FieldGroup label="Tenaga Pendidik">
-          <input className="admin-input" value={stats.teachers} onChange={e => update('teachers', e.target.value)} />
-        </FieldGroup>
-        <FieldGroup label="Tahun Berdiri">
-          <input className="admin-input" value={stats.years} onChange={e => update('years', e.target.value)} />
-        </FieldGroup>
-      </div>
-    </div>
-  );
-}
-
-function VisiMisiTab({ content, updateContent }) {
-  const handleMisiChange = (index, value) => {
-    updateContent('misi', prev => {
-      const newMisi = [...prev];
-      newMisi[index] = value;
-      return newMisi;
-    });
-  };
-
-  const addMisi = () => {
-    updateContent('misi', prev => [...prev, '']);
-  };
-
-  const removeMisi = (index) => {
-    updateContent('misi', prev => prev.filter((_, i) => i !== index));
-  };
+  const update = (key, val) =>
+    updateContent('hero', prev => ({ ...prev, [key]: val }));
 
   return (
     <div>
-      <div className="admin-section-card">
-        <h3>🌟 Visi</h3>
-        <FieldGroup label="Teks Visi">
-          <textarea className="admin-textarea" rows={3} value={content.visi} onChange={e => updateContent('visi', e.target.value)} />
-        </FieldGroup>
-      </div>
+      <h2>Hero</h2>
 
-      <div className="admin-section-card">
-        <h3>🎯 Misi</h3>
-        {content.misi.map((item, i) => (
-          <div key={i} className="admin-misi-row">
-            <span className="admin-misi-num">{i + 1}.</span>
-            <input className="admin-input" value={item} onChange={e => handleMisiChange(i, e.target.value)} />
-            <button className="admin-remove-btn" onClick={() => removeMisi(i)}>×</button>
-          </div>
-        ))}
-        <button className="btn btn-outline-pink btn-sm" onClick={addMisi} style={{ marginTop: '8px' }}>
-          + Tambah Misi
-        </button>
-      </div>
+      <Field label="Judul">
+        <input value={hero.headline} onChange={e => update("headline", e.target.value)} />
+      </Field>
+
+      <Field label="Deskripsi">
+        <textarea value={hero.subtitle} onChange={e => update("subtitle", e.target.value)} />
+      </Field>
+
+      <Field label="Upload Gambar">
+        <input
+          type="file"
+          onChange={async (e) => {
+            const url = await uploadImage(e.target.files[0]);
+            if (url) {
+              update("image", url);
+              showSaved();
+            }
+          }}
+        />
+      </Field>
+
+      {hero.image && <img src={hero.image} width="200" />}
     </div>
   );
 }
 
-function ContactTab({ content, updateContent }) {
-  const { contact } = content;
-  const update = (key, val) => updateContent('contact', prev => ({ ...prev, [key]: val }));
+/* ===== TENTANG ===== */
+
+function VisiMisiTab({ content, updateContent, showSaved }) {
 
   return (
-    <div className="admin-section-card">
-      <h3>📞 Informasi Kontak</h3>
-      <div className="admin-field-row">
-        <FieldGroup label="No. Telepon / WhatsApp">
-          <input className="admin-input" value={contact.phone} onChange={e => update('phone', e.target.value)} />
-        </FieldGroup>
-        <FieldGroup label="Email">
-          <input className="admin-input" type="email" value={contact.email} onChange={e => update('email', e.target.value)} />
-        </FieldGroup>
-      </div>
-      <FieldGroup label="Alamat Lengkap">
-        <textarea className="admin-textarea" rows={2} value={contact.address} onChange={e => update('address', e.target.value)} />
-      </FieldGroup>
-      <FieldGroup label="Nomor WhatsApp (kode negara, tanpa +)">
-        <input className="admin-input" value={contact.whatsapp} onChange={e => update('whatsapp', e.target.value)} placeholder="6283808417406" />
-      </FieldGroup>
-      <div className="admin-field-row">
-        <FieldGroup label="URL Instagram">
-          <input className="admin-input" value={contact.instagram} onChange={e => update('instagram', e.target.value)} />
-        </FieldGroup>
-        <FieldGroup label="URL Facebook">
-          <input className="admin-input" value={contact.facebook} onChange={e => update('facebook', e.target.value)} />
-        </FieldGroup>
-      </div>
+    <div>
+      <h2>Tentang Kami</h2>
+
+      <Field label="Deskripsi">
+        <textarea
+          value={content.aboutDesc || ''}
+          onChange={e => {
+            updateContent("aboutDesc", e.target.value);
+            showSaved();
+          }}
+        />
+      </Field>
+
+      <Field label="Upload Gambar">
+        <input
+          type="file"
+          onChange={async (e) => {
+            const url = await uploadImage(e.target.files[0]);
+            if (url) {
+              updateContent("aboutImage", url);
+              showSaved();
+            }
+          }}
+        />
+      </Field>
+
+      {content.aboutImage && <img src={content.aboutImage} width="200" />}
     </div>
   );
 }
 
-function PPDBTab({ content, updateContent }) {
+/* ===== PPDB ===== */
+
+function PPDBTab({ content, updateContent, showSaved }) {
   const { ppdb } = content;
-  const update = (key, val) => updateContent('ppdb', prev => ({ ...prev, [key]: val }));
+
+  const update = (key, val) =>
+    updateContent('ppdb', prev => ({ ...prev, [key]: val }));
 
   return (
-    <div className="admin-section-card">
-      <h3>📝 Informasi PPDB</h3>
-      <div className="admin-field-row">
-        <FieldGroup label="Tanggal Mulai">
-          <input className="admin-input" value={ppdb.startDate} onChange={e => update('startDate', e.target.value)} />
-        </FieldGroup>
-        <FieldGroup label="Tanggal Selesai">
-          <input className="admin-input" value={ppdb.endDate} onChange={e => update('endDate', e.target.value)} />
-        </FieldGroup>
-      </div>
-      <FieldGroup label="Gelombang">
-        <input className="admin-input" value={ppdb.wave} onChange={e => update('wave', e.target.value)} />
-      </FieldGroup>
-      <FieldGroup label="Kuota">
-        <input className="admin-input" value={ppdb.quota} onChange={e => update('quota', e.target.value)} />
-      </FieldGroup>
-    </div>
-  );
-}
+    <div>
+      <h2>PPDB</h2>
 
-function InstagramTab({ content, updateContent }) {
-  const handleChange = (index, value) => {
-    updateContent('instagramPosts', prev => {
-      const newPosts = [...prev];
-      newPosts[index] = value;
-      return newPosts;
-    });
-  };
+      <Field label="Deskripsi">
+        <textarea
+          value={ppdb.description || ''}
+          onChange={e => {
+            update("description", e.target.value);
+            showSaved();
+          }}
+        />
+      </Field>
 
-  const addPost = () => {
-    updateContent('instagramPosts', prev => [...prev, '']);
-  };
+      <Field label="Upload Banner">
+        <input
+          type="file"
+          onChange={async (e) => {
+            const url = await uploadImage(e.target.files[0]);
+            if (url) {
+              update("image", url);
+              showSaved();
+            }
+          }}
+        />
+      </Field>
 
-  const removePost = (index) => {
-    updateContent('instagramPosts', prev => prev.filter((_, i) => i !== index));
-  };
-
-  return (
-    <div className="admin-section-card">
-      <h3>📸 Postingan Instagram (ditampilkan di Berita & Acara)</h3>
-      <p className="admin-hint">Masukkan URL postingan Instagram yang ingin ditampilkan. Format: https://www.instagram.com/p/XXXXX/</p>
-      
-      {content.instagramPosts.map((url, i) => (
-        <div key={i} className="admin-misi-row">
-          <span className="admin-misi-num">{i + 1}.</span>
-          <input className="admin-input" value={url} onChange={e => handleChange(i, e.target.value)} placeholder="https://www.instagram.com/p/..." />
-          <button className="admin-remove-btn" onClick={() => removePost(i)}>×</button>
-        </div>
-      ))}
-      
-      <button className="btn btn-outline-pink btn-sm" onClick={addPost} style={{ marginTop: '8px' }}>
-        + Tambah Postingan
-      </button>
+      {ppdb.image && <img src={ppdb.image} width="200" />}
     </div>
   );
 }
