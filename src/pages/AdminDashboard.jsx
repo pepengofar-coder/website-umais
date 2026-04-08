@@ -415,12 +415,26 @@ function InstagramTab({ content, updateContent }) {
 }
 function FasilitasTab({ content, updateContent }) {
 
+  const upload = async (file, key) => {
+    if (!file || !supabase) return;
+
+    const fileName = Date.now() + "-" + file.name;
+
+    await supabase.storage.from("images").upload(fileName, file);
+
+    const { data } = supabase.storage
+      .from("images")
+      .getPublicUrl(fileName);
+
+    updateContent(key, data.publicUrl);
+  };
+
   return (
     <div className="admin-section-card">
-      <h3>🏫 Kelola Fasilitas</h3>
+      <h3>🏫 Kelola Fasilitas Website</h3>
 
-      <p>Fitur upload fasilitas aktif ✅</p>
-
+      <input type="file" onChange={(e) => upload(e.target.files[0], 'facility1')} />
+      {content.facility1 && <img src={content.facility1} width="120" />}
     </div>
   );
 }
