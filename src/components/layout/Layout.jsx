@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Footer from './Footer';
 import FloatingWhatsApp from '../shared/FloatingWhatsApp';
+import SitePopup from '../shared/SitePopup';
 
 export default function Layout() {
   return (
@@ -12,6 +13,7 @@ export default function Layout() {
       </main>
       <Footer />
       <FloatingWhatsApp />
+      <SitePopup />
     </div>
   );
 }

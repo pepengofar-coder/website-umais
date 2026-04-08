@@ -44,21 +44,62 @@ const DEFAULT_CONTENT = {
     'https://www.instagram.com/p/DH50FQphFiJ/',
     'https://www.instagram.com/p/DH3UAgahYtL/',
   ],
-  // Facilities (3 cards on homepage)
   facilities: [
     { image: '', title: 'Lingkungan Sekolah', desc: 'Kampus asri dan nyaman' },
     { image: '', title: 'Kelas Kreatif', desc: 'Ruang belajar multimedia' },
     { image: '', title: 'Area Terbuka', desc: 'Taman & area bermain' },
   ],
-  // About page
   aboutImage: '',
   aboutDesc: 'SMP Ummul Mukminin Aisyah (UMAIS) Bogor adalah sekolah Islam khusus muslimah yang berdiri dengan visi mencetak generasi muslimah yang cerdas, berakhlak mulia, dan berwawasan nasional.',
-  // Overview section
   overviewTitle: 'Sekolah Islam Kreatif untuk Muslimah Masa Depan',
   overviewDesc: 'SMP UMAIS Bogor hadir sebagai wadah pendidikan yang membentuk generasi muslimah cerdas, berakhlak, dan siap menghadapi tantangan global.',
+
+  // === NEW: Gallery photos ===
+  gallery: [
+    { image: '/images/hero-school.png', caption: 'Kampus SMP UMAIS Bogor', category: 'Sekolah' },
+    { image: '/images/classroom.png', caption: 'Kegiatan Belajar Mengajar', category: 'Akademik' },
+    { image: '/images/facilities.png', caption: 'Fasilitas Sekolah', category: 'Fasilitas' },
+    { image: '/images/hero-school.png', caption: 'Upacara Bendera', category: 'Kegiatan' },
+    { image: '/images/classroom.png', caption: 'Majelis Tahfidz', category: 'Keislaman' },
+    { image: '/images/facilities.png', caption: 'Wisuda & Kelulusan', category: 'Acara' },
+  ],
+
+  // === NEW: Academic calendar ===
+  calendar: [
+    { month: 'Juli', event: 'Awal Tahun Ajaran', desc: 'Masa Orientasi & Pembukaan' },
+    { month: 'September', event: 'UTS Semester 1', desc: 'Ujian Tengah Semester' },
+    { month: 'Desember', event: 'UAS Semester 1', desc: 'Ujian & Libur Semester' },
+    { month: 'Maret', event: 'UTS Semester 2', desc: 'Ujian Tengah Semester' },
+    { month: 'Mei', event: 'Ujian Akhir', desc: 'UAS & Persiapan Wisuda' },
+    { month: 'Juni', event: 'Wisuda', desc: 'Kelulusan & Pelepasan' },
+  ],
+
+  // === NEW: Popup/Banner ===
+  popup: {
+    enabled: false,
+    title: '📢 PPDB 2026/2027 Dibuka!',
+    subtitle: 'Segera daftarkan puteri Anda di SMP UMAIS Bogor',
+    description: 'Gelombang terakhir pendaftaran peserta didik baru. Kuota terbatas!',
+    buttonText: 'Daftar Sekarang',
+    buttonLink: '/ppdb',
+    image: '',
+    bgColor: '#be185d',
+  },
+
+  // === NEW: Extracurricular ===
+  extracurriculars: [
+    { icon: 'Palette', name: 'Seni Kaligrafi', desc: 'Menulis indah huruf Arab' },
+    { icon: 'PenTool', name: 'Jurnalistik', desc: 'Menulis & reportase' },
+    { icon: 'Monitor', name: 'Coding Club', desc: 'Pemrograman dasar' },
+    { icon: 'Dumbbell', name: 'Olahraga', desc: 'Badminton, Futsal, Panahan' },
+    { icon: 'Music', name: 'Nasyid', desc: 'Seni vokal Islami' },
+    { icon: 'Trophy', name: 'Olimpiade Sains', desc: 'Persiapan kompetisi' },
+    { icon: 'Sparkles', name: 'Life Skills', desc: 'Keterampilan hidup' },
+    { icon: 'BookOpenCheck', name: 'Tahsin', desc: "Perbaikan bacaan Qur'an" },
+  ],
 };
 
-// Helper: convert file to base64 data URL for localStorage storage
+// Helper: convert file to base64 data URL
 export function fileToDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -74,7 +115,6 @@ export function SiteContentProvider({ children }) {
       const saved = localStorage.getItem('umais_site_content');
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Deep merge to ensure new default fields are included
         return {
           ...DEFAULT_CONTENT,
           ...parsed,
@@ -82,7 +122,11 @@ export function SiteContentProvider({ children }) {
           stats: { ...DEFAULT_CONTENT.stats, ...(parsed.stats || {}) },
           contact: { ...DEFAULT_CONTENT.contact, ...(parsed.contact || {}) },
           ppdb: { ...DEFAULT_CONTENT.ppdb, ...(parsed.ppdb || {}) },
+          popup: { ...DEFAULT_CONTENT.popup, ...(parsed.popup || {}) },
           facilities: parsed.facilities || DEFAULT_CONTENT.facilities,
+          gallery: parsed.gallery || DEFAULT_CONTENT.gallery,
+          calendar: parsed.calendar || DEFAULT_CONTENT.calendar,
+          extracurriculars: parsed.extracurriculars || DEFAULT_CONTENT.extracurriculars,
         };
       }
       return DEFAULT_CONTENT;

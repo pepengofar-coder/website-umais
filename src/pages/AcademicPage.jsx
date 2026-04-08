@@ -1,4 +1,6 @@
-import { BookOpenCheck, Globe, Heart, Palette, Music, Monitor, Dumbbell, PenTool, BookOpen, Trophy, Sparkles } from 'lucide-react';
+import { BookOpenCheck, Globe, Heart, BookOpen } from 'lucide-react';
+import { useSiteContent } from '../lib/content';
+import { getIconComponent } from './AdminDashboard';
 import PageHeader from '../components/ui/PageHeader';
 import ScrollReveal from '../components/shared/ScrollReveal';
 import './AcademicPage.css';
@@ -6,8 +8,8 @@ import './AcademicPage.css';
 const curriculum = [
   {
     icon: <BookOpenCheck size={32} />,
-    title: 'Tahfidz Al-Qur\'an',
-    desc: 'Program hafalan Al-Qur\'an dengan metode mutqin. Target minimal 5 juz selama 3 tahun. Dibimbing oleh ustadzah-ustadzah hafidzhah bersanad.',
+    title: "Tahfidz Al-Qur'an",
+    desc: "Program hafalan Al-Qur'an dengan metode mutqin. Target minimal 5 juz selama 3 tahun. Dibimbing oleh ustadzah-ustadzah hafidzhah bersanad.",
     color: 'var(--pink-600)',
   },
   {
@@ -30,27 +32,11 @@ const curriculum = [
   },
 ];
 
-const extras = [
-  { icon: <Palette size={20} />, name: 'Seni Kaligrafi', desc: 'Menulis indah huruf Arab' },
-  { icon: <PenTool size={20} />, name: 'Jurnalistik', desc: 'Menulis & reportase' },
-  { icon: <Monitor size={20} />, name: 'Coding Club', desc: 'Pemrograman dasar' },
-  { icon: <Dumbbell size={20} />, name: 'Olahraga', desc: 'Badminton, Futsal, Panahan' },
-  { icon: <Music size={20} />, name: 'Nasyid', desc: 'Seni vokal Islami' },
-  { icon: <Trophy size={20} />, name: 'Olimpiade Sains', desc: 'Persiapan kompetisi' },
-  { icon: <Sparkles size={20} />, name: 'Life Skills', desc: 'Keterampilan hidup' },
-  { icon: <BookOpenCheck size={20} />, name: 'Tahsin', desc: 'Perbaikan bacaan Qur\'an' },
-];
-
-const timeline = [
-  { month: 'Juli', event: 'Awal Tahun Ajaran', desc: 'Masa Orientasi & Pembukaan' },
-  { month: 'September', event: 'UTS Semester 1', desc: 'Ujian Tengah Semester' },
-  { month: 'Desember', event: 'UAS Semester 1', desc: 'Ujian & Libur Semester' },
-  { month: 'Maret', event: 'UTS Semester 2', desc: 'Ujian Tengah Semester' },
-  { month: 'Mei', event: 'Ujian Akhir', desc: 'UAS & Persiapan Wisuda' },
-  { month: 'Juni', event: 'Wisuda', desc: 'Kelulusan & Pelepasan' },
-];
-
 export default function AcademicPage() {
+  const { content } = useSiteContent();
+  const calendar = content.calendar || [];
+  const extracurriculars = content.extracurriculars || [];
+
   return (
     <>
       <PageHeader
@@ -89,7 +75,7 @@ export default function AcademicPage() {
         </div>
       </section>
 
-      {/* Timeline */}
+      {/* Timeline — from content context */}
       <section className="section section-alt">
         <div className="container">
           <ScrollReveal>
@@ -101,7 +87,7 @@ export default function AcademicPage() {
           </ScrollReveal>
 
           <div className="timeline">
-            {timeline.map((item, i) => (
+            {calendar.map((item, i) => (
               <ScrollReveal key={i} delay={i * 0.1}>
                 <div className="timeline-item">
                   <div className="timeline-dot" />
@@ -117,7 +103,7 @@ export default function AcademicPage() {
         </div>
       </section>
 
-      {/* Extracurricular */}
+      {/* Extracurricular — from content context with dynamic icons */}
       <section className="section">
         <div className="container">
           <ScrollReveal>
@@ -130,10 +116,10 @@ export default function AcademicPage() {
           </ScrollReveal>
 
           <div className="ekskul-grid">
-            {extras.map((item, i) => (
+            {extracurriculars.map((item, i) => (
               <ScrollReveal key={i} delay={i * 0.06}>
                 <div className="card ekskul-card">
-                  <div className="ekskul-icon">{item.icon}</div>
+                  <div className="ekskul-icon">{getIconComponent(item.icon, 20)}</div>
                   <div>
                     <h4>{item.name}</h4>
                     <p>{item.desc}</p>
