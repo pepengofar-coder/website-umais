@@ -112,7 +112,7 @@ export default function Navbar() {
               </div>
               <div className="mobile-menu-footer">
                 <p>📞 0838-0841-7406</p>
-                <p>✉️ info@smpumaisbogor.sch.id</p>
+                <p>✉️ umaisbogor@gmail.com</p>
               </div>
             </motion.div>
           </>

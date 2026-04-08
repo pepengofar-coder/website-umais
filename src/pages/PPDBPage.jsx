@@ -350,7 +350,7 @@ Mohon informasi selanjutnya. Jazakumullahu khairan.`;
                     <div className="contact-item-icon"><Mail size={18} /></div>
                     <div>
                       <h4>Email</h4>
-                      <p>info@smpumaisbogor.sch.id</p>
+                      <p>umaisbogor@gmail.com</p>
                     </div>
                   </div>
                   <div className="contact-item">

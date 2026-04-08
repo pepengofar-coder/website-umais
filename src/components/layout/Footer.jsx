@@ -79,7 +79,7 @@ export default function Footer() {
                 </li>
                 <li>
                   <Mail size={14} />
-                  <span>info@smpumaisbogor.sch.id</span>
+                  <span>umaisbogor@gmail.com</span>
                 </li>
                 <li>
                   <MessageCircle size={14} />

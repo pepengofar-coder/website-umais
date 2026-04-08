@@ -1,4 +1,4 @@
-import { Users, Award, BookOpen, Building, Microscope, Library, Monitor, Landmark } from 'lucide-react';
+import { Users, Award, BookOpen, Building, Sprout, Library, Monitor, Landmark } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import ScrollReveal from '../components/shared/ScrollReveal';
 import './AboutPage.css';
@@ -14,7 +14,7 @@ const teachers = [
 
 const facilities = [
   { icon: <Landmark size={28} />, title: 'Musholla', desc: 'Tempat ibadah nyaman untuk sholat jamaah dan kajian rutin.' },
-  { icon: <Microscope size={28} />, title: 'Laboratorium IPA', desc: 'Dilengkapi peralatan modern untuk praktikum sains.' },
+  { icon: <Sprout size={28} />, title: 'Gardening', desc: 'Area berkebun dan bercocok tanam untuk pembelajaran sains alam langsung.' },
   { icon: <Monitor size={28} />, title: 'Lab Komputer', desc: 'Komputer terbaru dengan koneksi internet cepat.' },
   { icon: <Library size={28} />, title: 'Perpustakaan', desc: 'Koleksi buku lengkap islami dan akademik.' },
   { icon: <Building size={28} />, title: 'Ruang Kelas AC', desc: 'Kelas ber-AC dengan multimedia interaktif.' },
