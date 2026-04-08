@@ -1,3 +1,4 @@
+import { useSiteContent } from '../lib/content';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -12,78 +13,38 @@ import './HomePage.css';
 
 /* ===== HERO ===== */
 function HeroSection() {
+  const { content } = useSiteContent();
+  const hero = content.hero;
+
   return (
     <section className="hero">
       <div className="hero-bg">
-        <img src="/images/hero-school.png" alt="SMP UMAIS Bogor Campus" />
+        <img src={hero.image || "/images/hero-school.png"} alt="Hero" />
         <div className="hero-overlay" />
       </div>
+
       <div className="container hero-content">
         <motion.div
           className="hero-text"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+          transition={{ duration: 0.8 }}
         >
           <div className="hero-badge">
-            <Star size={12} />
-            School of Muslimah
+            {hero.badge}
           </div>
-          <h1>
-            Membangun Generasi
-            <span className="hero-highlight"> Muslimah </span>
-            Berakhlak Mulia & Berwawasan Nasional
-          </h1>
+
+          <h1>{hero.headline}</h1>
+
           <p className="hero-subtitle">
-            SMP Ummul Mukminin Aisyah Islamic School Kota Bogor — 
-            Memadukan pendidikan Islam berkualitas dengan standar akademik nasional.
+            {hero.subtitle}
           </p>
+
           <div className="hero-actions">
             <Link to="/ppdb" className="btn btn-primary btn-lg">
-              <Calendar size={18} />
               Pendaftaran PPDB
             </Link>
-            <a
-              href="https://wa.me/6283808417406?text=Assalamu'alaikum, saya ingin bertanya mengenai SMP UMAIS Bogor."
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-outline btn-lg"
-            >
-              <MessageCircle size={18} />
-              Hubungi Kami
-            </a>
           </div>
-        </motion.div>
-
-        <motion.div
-          className="hero-stats glass-dark"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.6 }}
-        >
-          <div className="hero-stat">
-            <span className="hero-stat-number">30+</span>
-            <span className="hero-stat-label">Alumni Berprestasi</span>
-          </div>
-          <div className="hero-stat-divider" />
-          <div className="hero-stat">
-            <span className="hero-stat-number">10+</span>
-            <span className="hero-stat-label">Tenaga Pendidik</span>
-          </div>
-          <div className="hero-stat-divider" />
-          <div className="hero-stat">
-            <span className="hero-stat-number">4+</span>
-            <span className="hero-stat-label">Tahun Berdiri</span>
-          </div>
-        </motion.div>
-      </div>
-
-      <div className="hero-scroll-indicator">
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          <ChevronLeft size={20} style={{ transform: 'rotate(-90deg)' }} />
         </motion.div>
       </div>
     </section>
@@ -128,7 +89,7 @@ function OverviewSection() {
             <h2>Sekolah Islam Kreatif untuk Muslimah Masa Depan</h2>
             <div className="divider divider-center" />
             <p>
-              SMP UMAIS Bogor hadir sebagai wadah pendidikan yang membentuk generasi 
+              SMP UMAIS Bogor hadir sebagai wadah pendidikan yang membentuk generasi
               muslimah cerdas, berakhlak, dan siap menghadapi tantangan global.
             </p>
           </div>
@@ -154,62 +115,30 @@ function OverviewSection() {
 
 /* ===== VISI MISI ===== */
 function VisionMission() {
+  const { content } = useSiteContent();
+
   return (
     <section className="section section-alt visi-section">
       <div className="container">
-        <ScrollReveal>
-          <div className="section-header">
-            <span className="badge badge-gold">Fondasi Kami</span>
-            <h2>Visi & Misi</h2>
-            <div className="divider divider-center" />
-          </div>
-        </ScrollReveal>
+
+        <h2>Visi & Misi</h2>
 
         <div className="visi-grid">
-          <ScrollReveal direction="left">
-            <div className="visi-card visi-card-main">
-              <div className="visi-icon">🌟</div>
-              <h3>Visi</h3>
-              <p>
-                "Menjadi lembaga pendidikan Islam unggulan yang melahirkan 
-                generasi muslimah berilmu, berakhlak mulia, mandiri, dan 
-                berdaya saing nasional."
-              </p>
-              <div className="ornament-line">
-                <span>✦</span>
-              </div>
-            </div>
-          </ScrollReveal>
+          <div className="visi-card">
+            <h3>Visi</h3>
+            <p>{content.visi}</p>
+          </div>
 
-          <ScrollReveal direction="right">
-            <div className="visi-card">
-              <div className="visi-icon">🎯</div>
-              <h3>Misi</h3>
-              <ul className="misi-list">
-                <li>
-                  <span className="misi-dot" />
-                  Menyelenggarakan pendidikan Islam yang berkualitas dan terintegrasi
-                </li>
-                <li>
-                  <span className="misi-dot" />
-                  Membentuk karakter muslimah yang berakhlak mulia sesuai Al-Qur'an dan Sunnah
-                </li>
-                <li>
-                  <span className="misi-dot" />
-                  Mengembangkan potensi akademik dan non-akademik secara optimal
-                </li>
-                <li>
-                  <span className="misi-dot" />
-                  Mempersiapkan lulusan yang mampu bersaing di tingkat nasional
-                </li>
-                <li>
-                  <span className="misi-dot" />
-                  Menciptakan lingkungan belajar yang kondusif, inovatif, dan menyenangkan
-                </li>
-              </ul>
-            </div>
-          </ScrollReveal>
+          <div className="visi-card">
+            <h3>Misi</h3>
+            <ul>
+              {content.misi?.map((item, i) => (
+                <li key={i}>{item}</li>
+              ))}
+            </ul>
+          </div>
         </div>
+
       </div>
     </section>
   );
@@ -217,54 +146,42 @@ function VisionMission() {
 
 /* ===== FACILITIES PREVIEW ===== */
 function FacilityPreview() {
+  const { content } = useSiteContent();
+
   const facilities = [
-    { img: '/images/facilities.png', title: 'Lingkungan Sekolah', desc: 'Kampus asri dan nyaman' },
-    { img: '/images/classroom.png', title: 'Kelas Kreatif', desc: 'Ruang belajar multimedia' },
-    { img: '/images/hero-school.png', title: 'Area Terbuka', desc: 'Taman & area bermain' },
+    {
+      img: content.facility1 || "/images/facilities.png",
+      title: "Lingkungan Sekolah",
+      desc: "Kampus asri dan nyaman"
+    },
+    {
+      img: content.facility2 || "/images/classroom.png",
+      title: "Kelas Kreatif",
+      desc: "Ruang belajar multimedia"
+    },
+    {
+      img: content.facility3 || "/images/hero-school.png",
+      title: "Area Terbuka",
+      desc: "Taman & area bermain"
+    },
   ];
 
   return (
     <section className="section facilities-section">
       <div className="container">
-        <ScrollReveal>
-          <div className="section-header">
-            <span className="badge badge-pink">Fasilitas</span>
-            <h2>Lingkungan Belajar yang Inspiratif</h2>
-            <div className="divider divider-center" />
-            <p>
-              Kami menyediakan fasilitas terbaik dan lingkungan yang kondusif 
-              untuk mendukung proses belajar mengajar yang berkualitas.
-            </p>
-          </div>
-        </ScrollReveal>
+
+        <h2>Fasilitas</h2>
 
         <div className="facilities-grid">
           {facilities.map((fac, i) => (
-            <ScrollReveal key={i} delay={i * 0.15}>
-              <div className="facility-card">
-                <div className="facility-img-wrap">
-                  <img src={fac.img} alt={fac.title} loading="lazy" />
-                  <div className="facility-img-overlay">
-                    <span>{fac.title}</span>
-                  </div>
-                </div>
-                <div className="facility-info">
-                  <h3>{fac.title}</h3>
-                  <p>{fac.desc}</p>
-                </div>
-              </div>
-            </ScrollReveal>
+            <div key={i} className="facility-card">
+              <img src={fac.img} />
+              <h3>{fac.title}</h3>
+              <p>{fac.desc}</p>
+            </div>
           ))}
         </div>
 
-        <ScrollReveal>
-          <div style={{ textAlign: 'center', marginTop: 'var(--space-8)' }}>
-            <Link to="/tentang" className="btn btn-outline-pink">
-              Lihat Semua Fasilitas
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-        </ScrollReveal>
       </div>
     </section>
   );
