@@ -18,6 +18,8 @@ const TABS = [
   { id: 'contact', label: 'Kontak', icon: <Phone size={18} /> },
   { id: 'ppdb', label: 'Info PPDB', icon: <GraduationCap size={18} /> },
   { id: 'instagram', label: 'Instagram Posts', icon: <Image size={18} /> },
+  { id: 'fasilitas', label: 'Fasilitas', icon: <Image size={18} /> },
+
 ];
 
 export default function AdminDashboard() {
@@ -102,6 +104,7 @@ export default function AdminDashboard() {
           {activeTab === 'contact' && <ContactTab content={content} updateContent={updateContent} />}
           {activeTab === 'ppdb' && <PPDBTab content={content} updateContent={updateContent} />}
           {activeTab === 'instagram' && <InstagramTab content={content} updateContent={updateContent} />}
+          {activeTab === 'fasilitas' && <FasilitasTab content={content} updateContent={updateContent} />}
         </div>
       </main>
 
