@@ -27,7 +27,7 @@ export default function Footer() {
               </div>
               <p className="footer-desc">
                 SMP Ummul Mukminin Aisyah Islamic School Kota Bogor. 
-                Membangun generasi muslimah berakhlak mulia dan berwawasan internasional.
+                Membangun generasi muslimah berakhlak mulia dan berwawasan nasional.
               </p>
               <div className="footer-socials">
                 <a href="https://www.instagram.com/smpumaisbogor/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
@@ -71,7 +71,7 @@ export default function Footer() {
               <ul className="footer-contact">
                 <li>
                   <MapPin size={14} />
-                  <span>Kota Bogor, Jawa Barat, Indonesia</span>
+                  <span>Jl. Kp. Salabenda, RT.02/RW.04, Kayu Manis, Tanah Sareal, Kota Bogor 16169</span>
                 </li>
                 <li>
                   <Phone size={14} />

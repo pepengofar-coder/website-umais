@@ -32,11 +32,11 @@ function HeroSection() {
           <h1>
             Membangun Generasi
             <span className="hero-highlight"> Muslimah </span>
-            Berakhlak Mulia & Berwawasan Internasional
+            Berakhlak Mulia & Berwawasan Nasional
           </h1>
           <p className="hero-subtitle">
             SMP Ummul Mukminin Aisyah Islamic School Kota Bogor — 
-            Memadukan pendidikan Islam berkualitas dengan standar akademik internasional.
+            Memadukan pendidikan Islam berkualitas dengan standar akademik nasional.
           </p>
           <div className="hero-actions">
             <Link to="/ppdb" className="btn btn-primary btn-lg">
@@ -62,17 +62,17 @@ function HeroSection() {
           transition={{ duration: 0.7, delay: 0.6 }}
         >
           <div className="hero-stat">
-            <span className="hero-stat-number">500+</span>
+            <span className="hero-stat-number">30+</span>
             <span className="hero-stat-label">Alumni Berprestasi</span>
           </div>
           <div className="hero-stat-divider" />
           <div className="hero-stat">
-            <span className="hero-stat-number">30+</span>
+            <span className="hero-stat-number">10+</span>
             <span className="hero-stat-label">Tenaga Pendidik</span>
           </div>
           <div className="hero-stat-divider" />
           <div className="hero-stat">
-            <span className="hero-stat-number">15+</span>
+            <span className="hero-stat-number">4+</span>
             <span className="hero-stat-label">Tahun Berdiri</span>
           </div>
         </motion.div>
@@ -100,8 +100,8 @@ const overviewData = [
   },
   {
     icon: <Globe size={28} />,
-    title: 'Standar Internasional',
-    description: 'Kurikulum yang memenuhi standar pendidikan internasional untuk daya saing global.',
+    title: 'Standar Nasional',
+    description: 'Kurikulum yang memenuhi standar pendidikan nasional untuk daya saing di tingkat nasional.',
     color: 'var(--pink-600)',
   },
   {
@@ -125,7 +125,7 @@ function OverviewSection() {
         <ScrollReveal>
           <div className="section-header">
             <span className="badge badge-pink">Keunggulan Kami</span>
-            <h2>Sekolah Islam Modern untuk Muslimah Masa Depan</h2>
+            <h2>Sekolah Islam Kreatif untuk Muslimah Masa Depan</h2>
             <div className="divider divider-center" />
             <p>
               SMP UMAIS Bogor hadir sebagai wadah pendidikan yang membentuk generasi 
@@ -173,7 +173,7 @@ function VisionMission() {
               <p>
                 "Menjadi lembaga pendidikan Islam unggulan yang melahirkan 
                 generasi muslimah berilmu, berakhlak mulia, mandiri, dan 
-                berdaya saing internasional."
+                berdaya saing nasional."
               </p>
               <div className="ornament-line">
                 <span>✦</span>
@@ -200,7 +200,7 @@ function VisionMission() {
                 </li>
                 <li>
                   <span className="misi-dot" />
-                  Mempersiapkan lulusan yang mampu bersaing di tingkat nasional dan internasional
+                  Mempersiapkan lulusan yang mampu bersaing di tingkat nasional
                 </li>
                 <li>
                   <span className="misi-dot" />
@@ -219,7 +219,7 @@ function VisionMission() {
 function FacilityPreview() {
   const facilities = [
     { img: '/images/facilities.png', title: 'Lingkungan Sekolah', desc: 'Kampus asri dan nyaman' },
-    { img: '/images/classroom.png', title: 'Kelas Modern', desc: 'Ruang belajar multimedia' },
+    { img: '/images/classroom.png', title: 'Kelas Kreatif', desc: 'Ruang belajar multimedia' },
     { img: '/images/hero-school.png', title: 'Area Terbuka', desc: 'Taman & area bermain' },
   ];
 
@@ -232,7 +232,7 @@ function FacilityPreview() {
             <h2>Lingkungan Belajar yang Inspiratif</h2>
             <div className="divider divider-center" />
             <p>
-              Kami menyediakan fasilitas modern dan lingkungan yang kondusif 
+              Kami menyediakan fasilitas terbaik dan lingkungan yang kondusif 
               untuk mendukung proses belajar mengajar yang berkualitas.
             </p>
           </div>

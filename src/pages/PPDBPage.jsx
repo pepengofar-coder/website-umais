@@ -316,14 +316,14 @@ Mohon informasi selanjutnya. Jazakumullahu khairan.`;
             <ScrollReveal direction="left">
               <div className="map-wrap">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126920.25855828944!2d106.7271528!3d-6.5970900!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69c5d1955fa5c9%3A0x301576d14beff30!2sBogor%2C%20West%20Java!5e0!3m2!1sen!2sid!4v1710000000000!5m2!1sen!2sid"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d990.7!2d106.8068!3d-6.5847!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69c5ca0b0b0b0b%3A0x0!2sFQ97%2B8V9%20Kayu%20Manis%2C%20Tanah%20Sareal%2C%20Kota%20Bogor!5e0!3m2!1sid!2sid!4v1710000000000!5m2!1sid!2sid"
                   width="100%"
                   height="100%"
                   style={{ border: 0, borderRadius: 'var(--radius-md)' }}
                   allowFullScreen=""
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="Lokasi SMP UMAIS Bogor"
+                  title="Lokasi SMP UMAIS Bogor - Kayu Manis, Tanah Sareal"
                 />
               </div>
             </ScrollReveal>
@@ -336,7 +336,7 @@ Mohon informasi selanjutnya. Jazakumullahu khairan.`;
                     <div className="contact-item-icon"><MapPin size={18} /></div>
                     <div>
                       <h4>Alamat</h4>
-                      <p>Kota Bogor, Jawa Barat, Indonesia</p>
+                      <p>Jl. Kp. Salabenda, RT.02/RW.04, Kayu Manis, Tanah Sareal, Kota Bogor, Jawa Barat 16169</p>
                     </div>
                   </div>
                   <div className="contact-item">

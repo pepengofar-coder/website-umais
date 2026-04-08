@@ -37,7 +37,7 @@ export default function AboutPage() {
               <div className="about-img-wrap">
                 <img src="/images/hero-school.png" alt="SMP UMAIS Bogor" />
                 <div className="about-img-badge glass">
-                  <span className="about-img-badge-num">15+</span>
+                  <span className="about-img-badge-num">4+</span>
                   <span>Tahun Berdiri</span>
                 </div>
               </div>
@@ -51,7 +51,7 @@ export default function AboutPage() {
                 <p>
                   SMP Ummul Mukminin Aisyah (UMAIS) Bogor adalah sekolah Islam khusus 
                   muslimah yang berdiri dengan visi mencetak generasi muslimah yang 
-                  cerdas, berakhlak mulia, dan berwawasan internasional.
+                  cerdas, berakhlak mulia, dan berwawasan nasional.
                 </p>
                 <p>
                   Dengan tagline <strong>"School of Muslimah"</strong>, SMP UMAIS 
@@ -60,7 +60,7 @@ export default function AboutPage() {
                   Tahfidz Al-Qur'an, kajian kitab, dan pembinaan akhlak.
                 </p>
                 <p>
-                  Berlokasi di Kota Bogor, Jawa Barat, SMP UMAIS menyediakan 
+                  Berlokasi di Kayu Manis, Tanah Sareal, Kota Bogor, SMP UMAIS menyediakan 
                   lingkungan belajar yang aman, nyaman, dan Islami untuk para 
                   santri-siswi kami berkembang secara optimal.
                 </p>
@@ -110,7 +110,7 @@ export default function AboutPage() {
               <span className="badge badge-pink">Fasilitas</span>
               <h2>Fasilitas Unggulan</h2>
               <div className="divider divider-center" />
-              <p>Kami menyediakan berbagai fasilitas modern untuk menunjang kegiatan belajar mengajar.</p>
+              <p>Kami menyediakan berbagai fasilitas terbaik untuk menunjang kegiatan belajar mengajar.</p>
             </div>
           </ScrollReveal>
 

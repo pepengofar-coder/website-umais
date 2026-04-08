@@ -30,6 +30,9 @@
   gap: 10px;
   margin-bottom: var(--space-4);
 }
+.footer-logo img {
+  mix-blend-mode: screen;
+}
 
 .footer-brand-name {
   font-family: var(--font-serif);

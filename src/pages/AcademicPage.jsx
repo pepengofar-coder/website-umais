@@ -1,4 +1,4 @@
-import { BookOpenCheck, Globe, Microscope, Palette, Music, Monitor, Dumbbell, PenTool, BookOpen, Trophy, Sparkles } from 'lucide-react';
+import { BookOpenCheck, Globe, Heart, Palette, Music, Monitor, Dumbbell, PenTool, BookOpen, Trophy, Sparkles } from 'lucide-react';
 import PageHeader from '../components/ui/PageHeader';
 import ScrollReveal from '../components/shared/ScrollReveal';
 import './AcademicPage.css';
@@ -17,9 +17,9 @@ const curriculum = [
     color: 'var(--pink-700)',
   },
   {
-    icon: <Microscope size={32} />,
-    title: 'STEM & Sains',
-    desc: 'Pembelajaran sains berbasis praktikum dengan laboratorium modern. Membangun kemampuan berpikir kritis dan analitis.',
+    icon: <Heart size={32} />,
+    title: 'Pendidikan Karakter Muslimah',
+    desc: 'Program pembentukan karakter wanita shalihah yang mandiri. Meliputi adab, keterampilan rumah tangga, kepemimpinan, dan kemandirian.',
     color: 'var(--pink-800)',
   },
   {
