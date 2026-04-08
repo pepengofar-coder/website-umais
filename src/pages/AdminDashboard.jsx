@@ -242,6 +242,43 @@ function VisiMisiTab({ content, updateContent }) {
       const newMisi = [...prev];
       newMisi[index] = value;
       return newMisi;
+      <div className="admin-section-card">
+        <h3>🖼️ Tentang Kami</h3>
+
+        <FieldGroup label="Deskripsi Tentang">
+          <textarea
+            className="admin-textarea"
+            value={content.aboutDesc || ''}
+            onChange={e => updateContent('aboutDesc', e.target.value)}
+          />
+        </FieldGroup>
+
+        <FieldGroup label="Upload Gambar Tentang">
+          <input
+            type="file"
+            onChange={async (e) => {
+              const file = e.target.files[0];
+              if (!file || !supabase) return;
+
+              const fileName = Date.now() + "-" + file.name;
+
+              await supabase.storage
+                .from("images")
+                .upload(fileName, file);
+
+              const { data } = supabase.storage
+                .from("images")
+                .getPublicUrl(fileName);
+
+              updateContent('aboutImage', data.publicUrl);
+            }}
+          />
+        </FieldGroup>
+
+        {content.aboutImage && (
+          <img src={content.aboutImage} width="200" />
+        )}
+      </div>
     });
   };
 
