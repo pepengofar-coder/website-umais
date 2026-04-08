@@ -1,4 +1,3 @@
-import { FaHome, FaUser, FaBook } from "react-icons/fa";
 import { useState, useEffect } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { Menu, X, ChevronDown } from 'lucide-react';

@@ -7,6 +7,7 @@ const DEFAULT_CONTENT = {
     badge: 'School of Muslimah',
     headline: 'Membangun Generasi Muslimah Berakhlak Mulia & Berwawasan Nasional',
     subtitle: 'SMP Ummul Mukminin Aisyah Islamic School Kota Bogor — Memadukan pendidikan Islam berkualitas dengan standar akademik nasional.',
+    image: '',
   },
   stats: {
     alumni: '30+',
@@ -43,13 +44,48 @@ const DEFAULT_CONTENT = {
     'https://www.instagram.com/p/DH50FQphFiJ/',
     'https://www.instagram.com/p/DH3UAgahYtL/',
   ],
+  // Facilities (3 cards on homepage)
+  facilities: [
+    { image: '', title: 'Lingkungan Sekolah', desc: 'Kampus asri dan nyaman' },
+    { image: '', title: 'Kelas Kreatif', desc: 'Ruang belajar multimedia' },
+    { image: '', title: 'Area Terbuka', desc: 'Taman & area bermain' },
+  ],
+  // About page
+  aboutImage: '',
+  aboutDesc: 'SMP Ummul Mukminin Aisyah (UMAIS) Bogor adalah sekolah Islam khusus muslimah yang berdiri dengan visi mencetak generasi muslimah yang cerdas, berakhlak mulia, dan berwawasan nasional.',
+  // Overview section
+  overviewTitle: 'Sekolah Islam Kreatif untuk Muslimah Masa Depan',
+  overviewDesc: 'SMP UMAIS Bogor hadir sebagai wadah pendidikan yang membentuk generasi muslimah cerdas, berakhlak, dan siap menghadapi tantangan global.',
 };
+
+// Helper: convert file to base64 data URL for localStorage storage
+export function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 export function SiteContentProvider({ children }) {
   const [content, setContent] = useState(() => {
     try {
       const saved = localStorage.getItem('umais_site_content');
-      return saved ? { ...DEFAULT_CONTENT, ...JSON.parse(saved) } : DEFAULT_CONTENT;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Deep merge to ensure new default fields are included
+        return {
+          ...DEFAULT_CONTENT,
+          ...parsed,
+          hero: { ...DEFAULT_CONTENT.hero, ...(parsed.hero || {}) },
+          stats: { ...DEFAULT_CONTENT.stats, ...(parsed.stats || {}) },
+          contact: { ...DEFAULT_CONTENT.contact, ...(parsed.contact || {}) },
+          ppdb: { ...DEFAULT_CONTENT.ppdb, ...(parsed.ppdb || {}) },
+          facilities: parsed.facilities || DEFAULT_CONTENT.facilities,
+        };
+      }
+      return DEFAULT_CONTENT;
     } catch {
       return DEFAULT_CONTENT;
     }

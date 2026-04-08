@@ -7,44 +7,84 @@ import {
   BookOpenCheck, Microscope, Palette, Dumbbell, Quote,
   ChevronLeft, ChevronRight, MapPin
 } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import ScrollReveal from '../components/shared/ScrollReveal';
 import './HomePage.css';
 
 /* ===== HERO ===== */
 function HeroSection() {
   const { content } = useSiteContent();
-  const hero = content.hero;
+  const { hero, stats } = content;
 
   return (
     <section className="hero">
       <div className="hero-bg">
-        <img src={hero.image || "/images/hero-school.png"} alt="Hero" />
+        <img src={hero.image || '/images/hero-school.png'} alt="SMP UMAIS Bogor Campus" />
         <div className="hero-overlay" />
       </div>
-
       <div className="container hero-content">
         <motion.div
           className="hero-text"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
           <div className="hero-badge">
+            <Star size={12} />
             {hero.badge}
           </div>
-
-          <h1>{hero.headline}</h1>
-
+          <h1>
+            {hero.headline}
+          </h1>
           <p className="hero-subtitle">
             {hero.subtitle}
           </p>
-
           <div className="hero-actions">
             <Link to="/ppdb" className="btn btn-primary btn-lg">
+              <Calendar size={18} />
               Pendaftaran PPDB
             </Link>
+            <a
+              href={`https://wa.me/${content.contact.whatsapp}?text=Assalamu'alaikum, saya ingin bertanya mengenai SMP UMAIS Bogor.`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-outline btn-lg"
+            >
+              <MessageCircle size={18} />
+              Hubungi Kami
+            </a>
           </div>
+        </motion.div>
+
+        <motion.div
+          className="hero-stats glass-dark"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.6 }}
+        >
+          <div className="hero-stat">
+            <span className="hero-stat-number">{stats.alumni}</span>
+            <span className="hero-stat-label">Alumni Berprestasi</span>
+          </div>
+          <div className="hero-stat-divider" />
+          <div className="hero-stat">
+            <span className="hero-stat-number">{stats.teachers}</span>
+            <span className="hero-stat-label">Tenaga Pendidik</span>
+          </div>
+          <div className="hero-stat-divider" />
+          <div className="hero-stat">
+            <span className="hero-stat-number">{stats.years}</span>
+            <span className="hero-stat-label">Tahun Berdiri</span>
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="hero-scroll-indicator">
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          <ChevronLeft size={20} style={{ transform: 'rotate(-90deg)' }} />
         </motion.div>
       </div>
     </section>
@@ -80,18 +120,17 @@ const overviewData = [
 ];
 
 function OverviewSection() {
+  const { content } = useSiteContent();
+
   return (
     <section className="section overview-section">
       <div className="container">
         <ScrollReveal>
           <div className="section-header">
             <span className="badge badge-pink">Keunggulan Kami</span>
-            <h2>Sekolah Islam Kreatif untuk Muslimah Masa Depan</h2>
+            <h2>{content.overviewTitle}</h2>
             <div className="divider divider-center" />
-            <p>
-              SMP UMAIS Bogor hadir sebagai wadah pendidikan yang membentuk generasi
-              muslimah cerdas, berakhlak, dan siap menghadapi tantangan global.
-            </p>
+            <p>{content.overviewDesc}</p>
           </div>
         </ScrollReveal>
 
@@ -120,25 +159,41 @@ function VisionMission() {
   return (
     <section className="section section-alt visi-section">
       <div className="container">
-
-        <h2>Visi & Misi</h2>
+        <ScrollReveal>
+          <div className="section-header">
+            <span className="badge badge-gold">Fondasi Kami</span>
+            <h2>Visi & Misi</h2>
+            <div className="divider divider-center" />
+          </div>
+        </ScrollReveal>
 
         <div className="visi-grid">
-          <div className="visi-card">
-            <h3>Visi</h3>
-            <p>{content.visi}</p>
-          </div>
+          <ScrollReveal direction="left">
+            <div className="visi-card visi-card-main">
+              <div className="visi-icon">🌟</div>
+              <h3>Visi</h3>
+              <p>"{content.visi}"</p>
+              <div className="ornament-line">
+                <span>✦</span>
+              </div>
+            </div>
+          </ScrollReveal>
 
-          <div className="visi-card">
-            <h3>Misi</h3>
-            <ul>
-              {content.misi?.map((item, i) => (
-                <li key={i}>{item}</li>
-              ))}
-            </ul>
-          </div>
+          <ScrollReveal direction="right">
+            <div className="visi-card">
+              <div className="visi-icon">🎯</div>
+              <h3>Misi</h3>
+              <ul className="misi-list">
+                {content.misi?.map((item, i) => (
+                  <li key={i}>
+                    <span className="misi-dot" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </ScrollReveal>
         </div>
-
       </div>
     </section>
   );
@@ -147,41 +202,51 @@ function VisionMission() {
 /* ===== FACILITIES PREVIEW ===== */
 function FacilityPreview() {
   const { content } = useSiteContent();
-
-  const facilities = [
-    {
-      img: content.facility1 || "/images/facilities.png",
-      title: "Lingkungan Sekolah",
-      desc: "Kampus asri dan nyaman"
-    },
-    {
-      img: content.facility2 || "/images/classroom.png",
-      title: "Kelas Kreatif",
-      desc: "Ruang belajar multimedia"
-    },
-    {
-      img: content.facility3 || "/images/hero-school.png",
-      title: "Area Terbuka",
-      desc: "Taman & area bermain"
-    },
-  ];
+  const defaultImages = ['/images/facilities.png', '/images/classroom.png', '/images/hero-school.png'];
+  const facilities = content.facilities || [];
 
   return (
     <section className="section facilities-section">
       <div className="container">
-
-        <h2>Fasilitas</h2>
+        <ScrollReveal>
+          <div className="section-header">
+            <span className="badge badge-pink">Fasilitas</span>
+            <h2>Lingkungan Belajar yang Inspiratif</h2>
+            <div className="divider divider-center" />
+            <p>
+              Kami menyediakan fasilitas terbaik dan lingkungan yang kondusif
+              untuk mendukung proses belajar mengajar yang berkualitas.
+            </p>
+          </div>
+        </ScrollReveal>
 
         <div className="facilities-grid">
           {facilities.map((fac, i) => (
-            <div key={i} className="facility-card">
-              <img src={fac.img} />
-              <h3>{fac.title}</h3>
-              <p>{fac.desc}</p>
-            </div>
+            <ScrollReveal key={i} delay={i * 0.15}>
+              <div className="facility-card">
+                <div className="facility-img-wrap">
+                  <img src={fac.image || defaultImages[i]} alt={fac.title} loading="lazy" />
+                  <div className="facility-img-overlay">
+                    <span>{fac.title}</span>
+                  </div>
+                </div>
+                <div className="facility-info">
+                  <h3>{fac.title}</h3>
+                  <p>{fac.desc}</p>
+                </div>
+              </div>
+            </ScrollReveal>
           ))}
         </div>
 
+        <ScrollReveal>
+          <div style={{ textAlign: 'center', marginTop: 'var(--space-8)' }}>
+            <Link to="/tentang" className="btn btn-outline-pink">
+              Lihat Semua Fasilitas
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+        </ScrollReveal>
       </div>
     </section>
   );
@@ -189,6 +254,8 @@ function FacilityPreview() {
 
 /* ===== PPDB BANNER ===== */
 function PPDBBanner() {
+  const { content } = useSiteContent();
+
   return (
     <section className="section ppdb-banner-section">
       <div className="container">
@@ -197,17 +264,17 @@ function PPDBBanner() {
             <div className="ppdb-banner-bg" />
             <div className="ppdb-banner-content">
               <span className="badge badge-gold" style={{ background: 'rgba(255,255,255,0.2)', color: 'white' }}>
-                📢 PPDB Gelombang Terakhir!
+                📢 {content.ppdb.wave}
               </span>
               <h2>Pendaftaran Peserta Didik Baru<br />Tahun Ajaran 2026/2027</h2>
-              <p>01 April – 30 Mei 2026 • Jangan sampai kehabisan kursi, daftar segera!</p>
+              <p>{content.ppdb.startDate} – {content.ppdb.endDate} • Jangan sampai kehabisan kursi, daftar segera!</p>
               <div className="hero-actions" style={{ justifyContent: 'center' }}>
                 <Link to="/ppdb" className="btn btn-primary btn-lg" style={{ background: 'white', color: 'var(--pink-700)', boxShadow: 'var(--shadow-lg)' }}>
                   <GraduationCap size={18} />
                   Daftar Sekarang
                 </Link>
                 <a
-                  href="https://wa.me/6283808417406?text=Assalamu'alaikum, saya ingin mendaftar PPDB SMP UMAIS Bogor."
+                  href={`https://wa.me/${content.contact.whatsapp}?text=Assalamu'alaikum, saya ingin mendaftar PPDB SMP UMAIS Bogor.`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-outline btn-lg"
@@ -332,6 +399,8 @@ function TestimonialSection() {
 
 /* ===== SOCIAL PROOF ===== */
 function SocialProof() {
+  const { content } = useSiteContent();
+
   return (
     <section className="section social-proof-section">
       <div className="container">
@@ -347,7 +416,7 @@ function SocialProof() {
         <div className="social-grid">
           <ScrollReveal delay={0.1}>
             <a
-              href="https://www.instagram.com/smpumaisbogor/"
+              href={content.contact.instagram}
               target="_blank"
               rel="noopener noreferrer"
               className="social-card social-instagram"
@@ -361,7 +430,7 @@ function SocialProof() {
 
           <ScrollReveal delay={0.2}>
             <a
-              href="https://www.facebook.com/umaisbogor"
+              href={content.contact.facebook}
               target="_blank"
               rel="noopener noreferrer"
               className="social-card social-facebook"
@@ -375,14 +444,14 @@ function SocialProof() {
 
           <ScrollReveal delay={0.3}>
             <a
-              href="https://wa.me/6283808417406"
+              href={`https://wa.me/${content.contact.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
               className="social-card social-whatsapp"
             >
               <div className="social-icon">💬</div>
               <h3>WhatsApp</h3>
-              <p>0838-0841-7406</p>
+              <p>{content.contact.phone}</p>
               <span className="social-follow">Chat Sekarang →</span>
             </a>
           </ScrollReveal>
