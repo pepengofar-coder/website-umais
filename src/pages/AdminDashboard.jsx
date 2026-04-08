@@ -1,3 +1,4 @@
+import { supabase } from '../lib/supabase';
 import { FaUsers, FaChalkboardTeacher, FaBook } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useState } from 'react';
@@ -173,7 +174,36 @@ function HeroTab({ content, updateContent }) {
       <h3>🏠 Konten Hero Section (Beranda)</h3>
       <FieldGroup label="Badge / Label Kecil">
         <input className="admin-input" value={hero.badge} onChange={e => update('badge', e.target.value)} />
+      </FieldGroup><FieldGroup label="Upload Gambar Hero">
+        <input
+          type="file"
+          onChange={async (e) => {
+            const file = e.target.files[0];
+            if (!file || !supabase) return;
+
+            const fileName = Date.now() + "-" + file.name;
+
+            const { error } = await supabase.storage
+              .from("images")
+              .upload(fileName, file);
+
+            if (error) {
+              alert("Upload gagal!");
+              return;
+            }
+
+            const { data } = supabase.storage
+              .from("images")
+              .getPublicUrl(fileName);
+
+            update('image', data.publicUrl);
+          }}
+        />
       </FieldGroup>
+
+      {content.hero.image && (
+        <img src={content.hero.image} width="200" />
+      )}
       <FieldGroup label="Headline Utama">
         <input className="admin-input" value={hero.headline} onChange={e => update('headline', e.target.value)} />
       </FieldGroup>
