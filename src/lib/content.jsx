@@ -2,6 +2,10 @@ import { createContext, useContext, useState, useEffect } from 'react';
 
 const SiteContentContext = createContext(null);
 
+// Maximum file size: 1MB (1000KB)
+export const MAX_FILE_SIZE = 1000 * 1024; // 1,000 KB = ~1MB
+export const MAX_TESTIMONIALS = 15;
+
 const DEFAULT_CONTENT = {
   hero: {
     badge: 'School of Muslimah',
@@ -97,7 +101,92 @@ const DEFAULT_CONTENT = {
     { icon: 'Sparkles', name: 'Life Skills', desc: 'Keterampilan hidup' },
     { icon: 'BookOpenCheck', name: 'Tahsin', desc: "Perbaikan bacaan Qur'an" },
   ],
+
+  // === NEW: Teachers (Profil Tenaga Pendidik) ===
+  teachers: [
+    { name: 'Ustadzah Nurul Hidayah, S.Pd.I', role: 'Kepala Sekolah', subject: 'Manajemen Pendidikan', initial: 'N', image: '', usePhoto: false },
+    { name: 'Ustadzah Siti Rahmah, M.Pd', role: 'Wakil Kurikulum', subject: 'Matematika', initial: 'S', image: '', usePhoto: false },
+    { name: 'Ustadzah Hafshah, S.Ag', role: 'Guru Tahfidz', subject: "Al-Qur'an & Hadits", initial: 'H', image: '', usePhoto: false },
+    { name: 'Ustadzah Maryam, S.Pd', role: 'Guru Bahasa', subject: 'English & Arabic', initial: 'M', image: '', usePhoto: false },
+    { name: 'Ustadzah Khadijah, M.Si', role: 'Guru IPA', subject: 'Sains & Matematika', initial: 'K', image: '', usePhoto: false },
+    { name: 'Ustadzah Fatimah, S.Pd', role: 'Guru BK', subject: 'Bimbingan Konseling', initial: 'F', image: '', usePhoto: false },
+  ],
+
+  // === NEW: About Page Facilities (Fasilitas Unggulan) ===
+  aboutFacilities: [
+    { icon: 'Landmark', title: 'Musholla', desc: 'Tempat ibadah nyaman untuk sholat jamaah dan kajian rutin.' },
+    { icon: 'Sprout', title: 'Gardening', desc: 'Area berkebun dan bercocok tanam untuk pembelajaran sains alam langsung.' },
+    { icon: 'Monitor', title: 'Lab Komputer', desc: 'Komputer terbaru dengan koneksi internet cepat.' },
+    { icon: 'Library', title: 'Perpustakaan', desc: 'Koleksi buku lengkap islami dan akademik.' },
+    { icon: 'Building', title: 'Ruang Kelas AC', desc: 'Kelas ber-AC dengan multimedia interaktif.' },
+    { icon: 'Award', title: 'Aula Serbaguna', desc: 'Untuk acara sekolah, seminar, dan pentas seni.' },
+  ],
+
+  // === NEW: About Page Gallery (Galeri Sekolah Kami) ===
+  aboutGallery: [
+    { image: '/images/classroom.png', caption: 'Suasana Kelas' },
+    { image: '/images/hero-school.png', caption: 'Kampus SMP UMAIS' },
+    { image: '/images/facilities.png', caption: 'Fasilitas Sekolah' },
+  ],
+
+  // === NEW: Testimonials (Testimoni Wali Murid) ===
+  testimonials: [
+    {
+      text: 'Alhamdulillah, anak saya sangat senang bersekolah di SMP UMAIS. Guru-gurunya sangat perhatian dan lingkungannya sangat Islami.',
+      name: 'Ibu Fatimah',
+      role: 'Wali Murid Kelas 8',
+      rating: 5,
+      image: '',
+    },
+    {
+      text: 'Program Tahfidz-nya luar biasa. Anak saya sudah hafal 5 juz dalam 2 tahun. Metode pembelajarannya sangat efektif.',
+      name: 'Ibu Sarah',
+      role: 'Wali Murid Kelas 9',
+      rating: 5,
+      image: '',
+    },
+    {
+      text: 'Kurikulum terpadu yang memadukan pendidikan Islam dan akademik umum membuat anak saya berkembang secara menyeluruh.',
+      name: 'Ibu Aisyah',
+      role: 'Wali Murid Kelas 7',
+      rating: 5,
+      image: '',
+    },
+    {
+      text: 'Lingkungan sekolah sangat kondusif dan aman. Anak saya menjadi lebih mandiri dan percaya diri sejak bersekolah di UMAIS.',
+      name: 'Ibu Khadijah',
+      role: 'Wali Murid Kelas 8',
+      rating: 5,
+      image: '',
+    },
+    {
+      text: 'Kegiatan ekstrakurikulernya sangat beragam. Anak saya sangat tertarik dengan program kaligrafi dan coding club.',
+      name: 'Ibu Zainab',
+      role: 'Wali Murid Kelas 7',
+      rating: 5,
+      image: '',
+    },
+    {
+      text: 'Guru-guru SMP UMAIS sangat kompeten dan sabar. Mereka benar-benar memperhatikan perkembangan setiap murid secara individual.',
+      name: 'Ibu Halimah',
+      role: 'Wali Murid Kelas 9',
+      rating: 5,
+      image: '',
+    },
+  ],
 };
+
+// Helper: validate file size (max 1MB / 1000KB)
+export function validateFileSize(file) {
+  if (file.size > MAX_FILE_SIZE) {
+    const sizeMB = (file.size / 1024).toFixed(0);
+    return {
+      valid: false,
+      error: `Ukuran file terlalu besar (${sizeMB}KB). Maksimal 1000KB (1MB).`,
+    };
+  }
+  return { valid: true, error: null };
+}
 
 // Helper: convert file to base64 data URL
 export function fileToDataUrl(file) {
@@ -127,6 +216,10 @@ export function SiteContentProvider({ children }) {
           gallery: parsed.gallery || DEFAULT_CONTENT.gallery,
           calendar: parsed.calendar || DEFAULT_CONTENT.calendar,
           extracurriculars: parsed.extracurriculars || DEFAULT_CONTENT.extracurriculars,
+          teachers: parsed.teachers || DEFAULT_CONTENT.teachers,
+          aboutFacilities: parsed.aboutFacilities || DEFAULT_CONTENT.aboutFacilities,
+          aboutGallery: parsed.aboutGallery || DEFAULT_CONTENT.aboutGallery,
+          testimonials: parsed.testimonials || DEFAULT_CONTENT.testimonials,
         };
       }
       return DEFAULT_CONTENT;

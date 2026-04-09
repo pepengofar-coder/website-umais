@@ -74,6 +74,21 @@
   font-weight: 700;
 }
 
+.teacher-photo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto var(--space-4);
+  border: 3px solid var(--pink-200);
+  box-shadow: 0 2px 12px rgba(190, 24, 93, 0.15);
+}
+.teacher-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .teacher-name {
   font-size: 0.9375rem;
   margin-bottom: var(--space-1);
@@ -126,13 +141,14 @@
 /* About Gallery */
 .about-gallery-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   grid-template-rows: auto;
   gap: var(--space-4);
 }
 .about-gallery-item {
   border-radius: var(--radius-md);
   overflow: hidden;
+  position: relative;
 }
 .about-gallery-item img {
   width: 100%;
@@ -143,22 +159,82 @@
 .about-gallery-item:hover img {
   transform: scale(1.05);
 }
-.about-gallery-tall {
-  grid-row: span 1;
+
+.about-gallery-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 10px 14px;
+  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 500;
 }
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 1024px) {
   .teacher-grid { grid-template-columns: repeat(2, 1fr); }
   .facility-list-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
-  .about-history { grid-template-columns: 1fr; gap: var(--space-8); }
-  .about-img-wrap img { height: 280px; }
-  .about-gallery-grid { grid-template-columns: 1fr; }
+  .about-history {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+  .about-img-wrap img {
+    height: 250px;
+  }
+  .about-gallery-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+  .about-gallery-item img {
+    height: 180px;
+  }
+  .teacher-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+  .teacher-card {
+    padding: var(--space-6) var(--space-4);
+  }
+  .teacher-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 1.25rem;
+  }
+  .teacher-photo {
+    width: 68px;
+    height: 68px;
+  }
+  .facility-list-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
-@media (max-width: 640px) {
-  .teacher-grid { grid-template-columns: 1fr; }
-  .facility-list-grid { grid-template-columns: 1fr; }
+@media (max-width: 480px) {
+  .teacher-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+  .teacher-card {
+    padding: var(--space-5) var(--space-3);
+  }
+  .teacher-name {
+    font-size: 0.8125rem;
+  }
+  .teacher-role, .teacher-subject {
+    font-size: 0.7rem;
+  }
+  .about-gallery-grid {
+    grid-template-columns: 1fr;
+  }
+  .about-gallery-item img {
+    height: 200px;
+  }
+  .about-img-wrap img {
+    height: 220px;
+  }
 }

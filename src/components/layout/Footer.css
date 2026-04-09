@@ -59,8 +59,8 @@
   gap: 8px;
 }
 .footer-socials a {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: rgba(255,255,255,0.1);
   display: flex;
@@ -142,6 +142,16 @@
 @media (max-width: 640px) {
   .footer-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-8);
+    gap: var(--space-6);
+  }
+  .footer-body {
+    padding: var(--space-8) 0;
+  }
+  .footer-links a {
+    padding: 4px 0;
+    font-size: 0.875rem;
+  }
+  .footer-contact li {
+    font-size: 0.875rem;
   }
 }

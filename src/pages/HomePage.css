@@ -351,6 +351,7 @@
   gap: var(--space-6);
   max-width: 700px;
   margin: 0 auto;
+  touch-action: pan-y;
 }
 
 .testimonial-content {
@@ -395,8 +396,8 @@
 }
 
 .testimonial-avatar {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--pink-400), var(--pink-600));
   display: flex;
@@ -405,6 +406,23 @@
   color: white;
   font-weight: 700;
   font-family: var(--font-serif);
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.testimonial-avatar-photo {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--pink-200);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(190, 24, 93, 0.15);
+}
+.testimonial-avatar-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .testimonial-name {
@@ -418,8 +436,8 @@
 }
 
 .testimonial-nav-btn {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: 1px solid var(--pink-200);
   background: var(--bg-card);
@@ -442,6 +460,7 @@
   justify-content: center;
   gap: 8px;
   margin-top: var(--space-6);
+  flex-wrap: wrap;
 }
 .testimonial-dot {
   width: 8px;
@@ -451,6 +470,9 @@
   background: var(--pink-200);
   cursor: pointer;
   transition: all var(--transition-fast);
+  padding: 0;
+  min-width: 8px;
+  min-height: 8px;
 }
 .testimonial-dot.active {
   background: var(--pink-500);
@@ -520,24 +542,158 @@
 }
 
 @media (max-width: 768px) {
-  .hero-content { padding: var(--space-10) 0; }
+  .hero {
+    min-height: 100svh;
+  }
+  .hero-content {
+    padding: var(--space-10) 0;
+  }
+  .hero h1 {
+    font-size: clamp(1.75rem, 6vw, 2.5rem);
+    margin-bottom: var(--space-4);
+  }
+  .hero-subtitle {
+    font-size: 0.9375rem;
+    margin-bottom: var(--space-6);
+  }
+  .hero-badge {
+    font-size: 0.65rem;
+    padding: 5px 12px;
+    margin-bottom: var(--space-4);
+  }
   .hero-stats {
     flex-direction: row;
     gap: var(--space-4);
     padding: var(--space-4) var(--space-5);
     width: 100%;
     justify-content: center;
+    margin-top: var(--space-8);
   }
-  .hero-stat-number { font-size: 1.25rem; }
-  .visi-grid { grid-template-columns: 1fr; }
-  .social-grid { grid-template-columns: 1fr; }
+  .hero-stat-number {
+    font-size: 1.25rem;
+  }
+  .hero-stat-label {
+    font-size: 0.65rem;
+  }
+  .hero-stat-divider {
+    height: 30px;
+  }
+  .visi-grid {
+    grid-template-columns: 1fr;
+  }
+  .visi-card {
+    padding: var(--space-8);
+  }
+  .social-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  .social-card {
+    padding: var(--space-6) var(--space-5);
+    flex-direction: row;
+    gap: var(--space-4);
+    text-align: left;
+  }
+  .social-icon {
+    font-size: 2rem;
+    margin-bottom: 0;
+  }
+  .social-follow {
+    margin-top: var(--space-2);
+  }
+  .facilities-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  .facility-card {
+    display: flex;
+    flex-direction: row;
+  }
+  .facility-img-wrap {
+    width: 120px;
+    min-width: 120px;
+    height: auto;
+    min-height: 120px;
+  }
+  .facility-info {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .testimonial-card {
+    padding: var(--space-6) var(--space-5);
+  }
+  .testimonial-text {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+  }
+  .testimonial-quote-icon {
+    display: none;
+  }
+  .ppdb-banner {
+    padding: var(--space-10) var(--space-5);
+    border-radius: var(--radius-lg);
+  }
+  .ppdb-banner-content p {
+    font-size: 0.9375rem;
+  }
 }
 
 @media (max-width: 640px) {
-  .overview-grid { grid-template-columns: 1fr; }
-  .facilities-grid { grid-template-columns: 1fr; }
-  .hero-actions { flex-direction: column; }
-  .hero-actions .btn { width: 100%; justify-content: center; }
-  .testimonial-nav-btn { display: none; }
-  .ppdb-banner { padding: var(--space-10) var(--space-5); }
+  .overview-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+  .overview-card {
+    padding: var(--space-5) var(--space-4);
+  }
+  .overview-card p {
+    font-size: 0.8125rem;
+  }
+  .overview-icon {
+    width: 48px;
+    height: 48px;
+  }
+  .hero-actions {
+    flex-direction: column;
+  }
+  .hero-actions .btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+  }
+  .testimonial-nav-btn {
+    display: none;
+  }
+  .testimonial-carousel {
+    padding: 0;
+  }
+  .visi-card-main p {
+    font-size: 1rem;
+  }
+  .misi-list li {
+    font-size: 0.875rem;
+  }
+  .facility-card {
+    flex-direction: column;
+  }
+  .facility-img-wrap {
+    width: 100%;
+    min-width: unset;
+    height: 180px;
+  }
+}
+
+@media (max-width: 400px) {
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-stats {
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+  }
+  .hero-stat-number {
+    font-size: 1.125rem;
+  }
 }

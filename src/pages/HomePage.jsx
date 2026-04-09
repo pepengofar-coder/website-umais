@@ -7,7 +7,7 @@ import {
   BookOpenCheck, Microscope, Palette, Dumbbell, Quote,
   ChevronLeft, ChevronRight, MapPin
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ScrollReveal from '../components/shared/ScrollReveal';
 import './HomePage.css';
 
@@ -291,37 +291,40 @@ function PPDBBanner() {
   );
 }
 
-/* ===== TESTIMONIALS ===== */
-const testimonials = [
-  {
-    text: 'Alhamdulillah, anak saya sangat senang bersekolah di SMP UMAIS. Guru-gurunya sangat perhatian dan lingkungannya sangat Islami.',
-    name: 'Ibu Fatimah',
-    role: 'Wali Murid Kelas 8',
-    rating: 5,
-  },
-  {
-    text: 'Program Tahfidz-nya luar biasa. Anak saya sudah hafal 5 juz dalam 2 tahun. Metode pembelajarannya sangat efektif.',
-    name: 'Ibu Sarah',
-    role: 'Wali Murid Kelas 9',
-    rating: 5,
-  },
-  {
-    text: 'Kurikulum terpadu yang memadukan pendidikan Islam dan akademik umum membuat anak saya berkembang secara menyeluruh.',
-    name: 'Ibu Aisyah',
-    role: 'Wali Murid Kelas 7',
-    rating: 5,
-  },
-];
-
+/* ===== TESTIMONIALS (Dynamic from content) ===== */
 function TestimonialSection() {
+  const { content } = useSiteContent();
+  const testimonials = content.testimonials || [];
   const [current, setCurrent] = useState(0);
 
+  // Auto-advance
   useEffect(() => {
+    if (testimonials.length === 0) return;
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % testimonials.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [testimonials.length]);
+
+  // Touch swipe support
+  const [touchStart, setTouchStart] = useState(null);
+  const handleTouchStart = (e) => setTouchStart(e.touches[0].clientX);
+  const handleTouchEnd = useCallback((e) => {
+    if (touchStart === null) return;
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        setCurrent((prev) => (prev + 1) % testimonials.length);
+      } else {
+        setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+      }
+    }
+    setTouchStart(null);
+  }, [touchStart, testimonials.length]);
+
+  if (testimonials.length === 0) return null;
+
+  const currentTestimonial = testimonials[current] || testimonials[0];
 
   return (
     <section className="section section-alt testimonial-section">
@@ -335,7 +338,11 @@ function TestimonialSection() {
         </ScrollReveal>
 
         <ScrollReveal>
-          <div className="testimonial-carousel">
+          <div
+            className="testimonial-carousel"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <button
               className="testimonial-nav-btn"
               onClick={() => setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length)}
@@ -354,19 +361,25 @@ function TestimonialSection() {
                 className="testimonial-card"
               >
                 <Quote size={32} className="testimonial-quote-icon" />
-                <p className="testimonial-text">{testimonials[current].text}</p>
+                <p className="testimonial-text">{currentTestimonial.text}</p>
                 <div className="testimonial-stars">
-                  {Array.from({ length: testimonials[current].rating }).map((_, i) => (
+                  {Array.from({ length: currentTestimonial.rating || 5 }).map((_, i) => (
                     <Star key={i} size={16} fill="var(--gold)" color="var(--gold)" />
                   ))}
                 </div>
                 <div className="testimonial-author">
-                  <div className="testimonial-avatar">
-                    {testimonials[current].name.charAt(4)}
-                  </div>
+                  {currentTestimonial.image ? (
+                    <div className="testimonial-avatar-photo">
+                      <img src={currentTestimonial.image} alt={currentTestimonial.name} />
+                    </div>
+                  ) : (
+                    <div className="testimonial-avatar">
+                      {currentTestimonial.name ? currentTestimonial.name.charAt(0) : '?'}
+                    </div>
+                  )}
                   <div>
-                    <div className="testimonial-name">{testimonials[current].name}</div>
-                    <div className="testimonial-role">{testimonials[current].role}</div>
+                    <div className="testimonial-name">{currentTestimonial.name}</div>
+                    <div className="testimonial-role">{currentTestimonial.role}</div>
                   </div>
                 </div>
               </motion.div>

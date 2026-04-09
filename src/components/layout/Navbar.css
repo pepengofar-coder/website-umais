@@ -141,10 +141,14 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px;
+  padding: 10px;
   color: var(--warm-700);
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
 }
 .navbar-toggle:hover {
   background: var(--pink-50);
@@ -202,6 +206,9 @@
   text-decoration: none;
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
+  min-height: 48px;
+  display: flex;
+  align-items: center;
 }
 .mobile-link:hover {
   background: var(--pink-50);
