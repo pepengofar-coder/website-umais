@@ -12,54 +12,20 @@ const tabs = [
   { id: 'social', label: 'Media Sosial', icon: <Share2 size={16} /> },
 ];
 
-async function fetchInstagramEmbed(postUrl) {
-  try {
-    const oembedUrl = `https://api.instagram.com/oembed/?url=${encodeURIComponent(postUrl)}&omitscript=true`;
-    const res = await fetch(oembedUrl);
-    if (!res.ok) throw new Error('Failed to fetch');
-    return await res.json();
-  } catch {
-    return null;
-  }
+/* Extract Instagram post ID from URL */
+function extractInstagramPostId(url) {
+  if (!url) return null;
+  const match = url.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
+  return match ? match[1] : null;
 }
 
+/* Instagram Embed via iframe — same approach as admin dashboard */
 function InstagramEmbed({ postUrl }) {
-  const [html, setHtml] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const postId = extractInstagramPostId(postUrl);
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(false);
-    fetchInstagramEmbed(postUrl).then((data) => {
-      if (cancelled) return;
-      if (data && data.html) {
-        setHtml(data.html);
-      } else {
-        setError(true);
-      }
-      setLoading(false);
-    });
-    return () => { cancelled = true; };
-  }, [postUrl]);
-
-  useEffect(() => {
-    if (html && window.instgrm) {
-      window.instgrm.Embeds.process();
-    }
-  }, [html]);
-
-  if (loading) {
-    return (
-      <div className="ig-embed-placeholder">
-        <Loader2 size={24} className="spin" />
-        <span>Memuat postingan...</span>
-      </div>
-    );
-  }
-
-  if (error) {
+  if (!postId) {
     return (
       <a href={postUrl} target="_blank" rel="noopener noreferrer" className="ig-embed-placeholder ig-embed-fallback">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
@@ -69,36 +35,45 @@ function InstagramEmbed({ postUrl }) {
     );
   }
 
-  return <div className="ig-embed-card" dangerouslySetInnerHTML={{ __html: html }} />;
+  return (
+    <div className="ig-iframe-wrap">
+      {!loaded && !error && (
+        <div className="ig-embed-placeholder ig-embed-loading">
+          <Loader2 size={24} className="spin" />
+          <span>Memuat postingan...</span>
+        </div>
+      )}
+      {error && (
+        <a href={postUrl} target="_blank" rel="noopener noreferrer" className="ig-embed-placeholder ig-embed-fallback">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          <span>Lihat di Instagram</span>
+          <ExternalLink size={14} />
+        </a>
+      )}
+      <iframe
+        src={`https://www.instagram.com/p/${postId}/embed/`}
+        className={`ig-iframe ${loaded ? 'visible' : ''}`}
+        frameBorder="0"
+        scrolling="no"
+        allowTransparency="true"
+        title="Instagram Post"
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        onError={() => setError(true)}
+        style={{ display: error ? 'none' : 'block' }}
+      />
+    </div>
+  );
 }
 
 export default function GalleryPage() {
   const { content } = useSiteContent();
   const [activeTab, setActiveTab] = useState('photos');
   const [selectedPhoto, setSelectedPhoto] = useState(null);
-  const [igScriptLoaded, setIgScriptLoaded] = useState(false);
 
   // Use gallery from content context (admin-managed)
   const photos = content.gallery || [];
   const instagramPosts = content.instagramPosts || [];
-
-  useEffect(() => {
-    if (document.querySelector('script[src*="instagram.com/embed.js"]')) {
-      setIgScriptLoaded(true);
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = 'https://www.instagram.com/embed.js';
-    script.async = true;
-    script.onload = () => setIgScriptLoaded(true);
-    document.body.appendChild(script);
-  }, []);
-
-  useEffect(() => {
-    if (activeTab === 'news' && igScriptLoaded && window.instgrm) {
-      setTimeout(() => window.instgrm.Embeds.process(), 300);
-    }
-  }, [activeTab, igScriptLoaded]);
 
   return (
     <>
