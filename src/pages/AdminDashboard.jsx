@@ -162,10 +162,10 @@ export default function AdminDashboard() {
         <div className="admin-topbar">
           <h1>{TABS.find(t => t.id === activeTab)?.label || 'Dashboard'}</h1>
           <div className="admin-topbar-actions">
-            {saveStatus === 'saving' && <span className="admin-saved-badge admin-saving">⏳ Menyimpan...</span>}
-            {saveStatus === 'saved' && <span className="admin-saved-badge"><Check size={14} /> Tersimpan ke cloud!</span>}
-            {saveStatus === 'error' && <span className="admin-saved-badge admin-save-error">❌ Gagal menyimpan</span>}
-            {hasUnsavedChanges && saveStatus === 'idle' && <span className="admin-saved-badge admin-unsaved">● Belum disimpan</span>}
+            {saveStatus === 'saving' && <span className="admin-saved-badge admin-saving">⏳ Menyimpan ke cloud...</span>}
+            {saveStatus === 'saved' && <span className="admin-saved-badge"><Check size={14} /> Tersinkron ke cloud!</span>}
+            {saveStatus === 'error' && <span className="admin-saved-badge admin-save-error">❌ Gagal menyimpan ke cloud</span>}
+            {hasUnsavedChanges && saveStatus === 'idle' && <span className="admin-saved-badge admin-unsaved">● Menunggu sinkron...</span>}
             <button className="btn btn-outline-pink btn-sm" onClick={resetContent}>
               <RotateCcw size={14} /> Reset Default
             </button>

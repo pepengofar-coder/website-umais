@@ -101,12 +101,14 @@ const DEFAULT_CONTENT = {
   ],
 
   teachers: [
-    { name: 'Ustadzah Nurul Hidayah, S.Pd.I', role: 'Kepala Sekolah', subject: 'Manajemen Pendidikan', initial: 'N', image: '', usePhoto: false },
-    { name: 'Ustadzah Siti Rahmah, M.Pd', role: 'Wakil Kurikulum', subject: 'Matematika', initial: 'S', image: '', usePhoto: false },
-    { name: 'Ustadzah Hafshah, S.Ag', role: 'Guru Tahfidz', subject: "Al-Qur'an & Hadits", initial: 'H', image: '', usePhoto: false },
-    { name: 'Ustadzah Maryam, S.Pd', role: 'Guru Bahasa', subject: 'English & Arabic', initial: 'M', image: '', usePhoto: false },
-    { name: 'Ustadzah Khadijah, M.Si', role: 'Guru IPA', subject: 'Sains & Matematika', initial: 'K', image: '', usePhoto: false },
-    { name: 'Ustadzah Fatimah, S.Pd', role: 'Guru BK', subject: 'Bimbingan Konseling', initial: 'F', image: '', usePhoto: false },
+    { name: 'Nadia Meri Andiani, S.Pd', role: 'Guru Mapel', subject: 'Pendidikan Pancasila, IPS, dan Olahraga', initial: 'N', image: '', usePhoto: false },
+    { name: 'Annisa Nur\'amalia S, S.Pd', role: 'Guru IPA', subject: 'IPA', initial: 'A', image: '', usePhoto: false },
+    { name: 'Nadira Azzukhruf', role: 'Guru Tahfidz', subject: 'Tahfidz', initial: 'N', image: '', usePhoto: false },
+    { name: 'Diana Shinta Sofyanti, S.Pd', role: 'Guru Bahasa', subject: 'B. Inggris dan B. Indonesia', initial: 'D', image: '', usePhoto: false },
+    { name: 'Evanti Yuni Kartika, S.Pd.', role: 'Guru Matematika', subject: 'Matematika, Tafsir dan Sirah Shahabiyah', initial: 'E', image: '', usePhoto: false },
+    { name: 'Mutik Ramzayana', role: 'Guru Keislaman', subject: 'Tahfidz, Fiqih', initial: 'M', image: '', usePhoto: false },
+    { name: 'Aisyah Aini Asshofa', role: 'Guru Bahasa Arab', subject: 'Tahfidz, B. Arab', initial: 'A', image: '', usePhoto: false },
+    { name: "Sa'adia Hanoum", role: 'Guru Kefitrahan', subject: 'Kefitrahan', initial: 'S', image: '', usePhoto: false },
   ],
 
   aboutFacilities: [
@@ -263,6 +265,7 @@ export function SiteContentProvider({ children }) {
   const [saveStatus, setSaveStatus] = useState('idle'); // idle | saving | saved | error
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const contentRef = useRef(content);
+  const autoSaveTimerRef = useRef(null);
 
   // Keep ref in sync
   useEffect(() => {
@@ -311,7 +314,40 @@ export function SiteContentProvider({ children }) {
     return () => { cancelled = true; };
   }, []);
 
-  // updateContent: updates local state only (no cloud save yet)
+  // Cleanup auto-save timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Auto-save to Supabase (debounced) — triggers after every content change
+  const scheduleAutoSave = useCallback(() => {
+    if (!supabase) return;
+
+    // Clear previous timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+
+    // Debounce: save after 1.5 seconds of no changes
+    autoSaveTimerRef.current = setTimeout(async () => {
+      const currentContent = contentRef.current;
+      setSaveStatus('saving');
+      const success = await saveContentToSupabase(currentContent);
+      if (success) {
+        setSaveStatus('saved');
+        setHasUnsavedChanges(false);
+      } else {
+        setSaveStatus('error');
+      }
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    }, 1500);
+  }, []);
+
+  // updateContent: updates local state + localStorage + auto-save to Supabase
   const updateContent = useCallback((section, data) => {
     setContent(prev => {
       const newContent = {
@@ -323,10 +359,18 @@ export function SiteContentProvider({ children }) {
       return newContent;
     });
     setHasUnsavedChanges(true);
-  }, []);
+    // Auto-save to Supabase backend (debounced)
+    scheduleAutoSave();
+  }, [scheduleAutoSave]);
 
-  // saveToCloud: explicit save to Supabase (triggered by "Simpan Perubahan" button)
+  // saveToCloud: explicit/manual save to Supabase (triggered by "Simpan Perubahan" button)
   const saveToCloud = useCallback(async () => {
+    // Cancel any pending auto-save
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
+
     const currentContent = contentRef.current;
     setSaveStatus('saving');
 
@@ -349,6 +393,12 @@ export function SiteContentProvider({ children }) {
   }, []);
 
   const resetContent = useCallback(async () => {
+    // Cancel any pending auto-save
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = null;
+    }
+
     setContent(DEFAULT_CONTENT);
     localStorage.removeItem('umais_site_content');
     setHasUnsavedChanges(false);
