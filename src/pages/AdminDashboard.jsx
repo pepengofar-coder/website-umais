@@ -102,7 +102,7 @@ const TABS = [
 
 export default function AdminDashboard() {
   const { logout } = useAuth();
-  const { content, updateContent, resetContent, loading, saveStatus } = useSiteContent();
+  const { content, updateContent, resetContent, saveToCloud, loading, saveStatus, hasUnsavedChanges } = useSiteContent();
   const [activeTab, setActiveTab] = useState('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -165,6 +165,7 @@ export default function AdminDashboard() {
             {saveStatus === 'saving' && <span className="admin-saved-badge admin-saving">⏳ Menyimpan...</span>}
             {saveStatus === 'saved' && <span className="admin-saved-badge"><Check size={14} /> Tersimpan ke cloud!</span>}
             {saveStatus === 'error' && <span className="admin-saved-badge admin-save-error">❌ Gagal menyimpan</span>}
+            {hasUnsavedChanges && saveStatus === 'idle' && <span className="admin-saved-badge admin-unsaved">● Belum disimpan</span>}
             <button className="btn btn-outline-pink btn-sm" onClick={resetContent}>
               <RotateCcw size={14} /> Reset Default
             </button>
@@ -173,20 +174,20 @@ export default function AdminDashboard() {
 
         <div className="admin-content">
           {activeTab === 'overview' && <OverviewTab content={content} />}
-          {activeTab === 'hero' && <HeroTab content={content} updateContent={updateContent} />}
-          {activeTab === 'stats' && <StatsTab content={content} updateContent={updateContent} />}
-          {activeTab === 'overview-section' && <OverviewSectionTab content={content} updateContent={updateContent} />}
-          {activeTab === 'visi-misi' && <VisiMisiTab content={content} updateContent={updateContent} />}
-          {activeTab === 'fasilitas' && <FasilitasTab content={content} updateContent={updateContent} />}
-          {activeTab === 'gallery' && <GalleryTab content={content} updateContent={updateContent} />}
-          {activeTab === 'extracurricular' && <ExtracurricularTab content={content} updateContent={updateContent} />}
-          {activeTab === 'calendar' && <CalendarTab content={content} updateContent={updateContent} />}
-          {activeTab === 'popup' && <PopupTab content={content} updateContent={updateContent} />}
-          {activeTab === 'about' && <AboutTab content={content} updateContent={updateContent} />}
-          {activeTab === 'testimonials' && <TestimonialsTab content={content} updateContent={updateContent} />}
-          {activeTab === 'contact' && <ContactTab content={content} updateContent={updateContent} />}
-          {activeTab === 'ppdb' && <PPDBTab content={content} updateContent={updateContent} />}
-          {activeTab === 'instagram' && <InstagramTab content={content} updateContent={updateContent} />}
+          {activeTab === 'hero' && <HeroTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
+          {activeTab === 'stats' && <StatsTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
+          {activeTab === 'overview-section' && <OverviewSectionTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
+          {activeTab === 'visi-misi' && <VisiMisiTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
+          {activeTab === 'fasilitas' && <FasilitasTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
+          {activeTab === 'gallery' && <GalleryTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
+          {activeTab === 'extracurricular' && <ExtracurricularTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
+          {activeTab === 'calendar' && <CalendarTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
+          {activeTab === 'popup' && <PopupTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
+          {activeTab === 'about' && <AboutTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
+          {activeTab === 'testimonials' && <TestimonialsTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
+          {activeTab === 'contact' && <ContactTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
+          {activeTab === 'ppdb' && <PPDBTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
+          {activeTab === 'instagram' && <InstagramTab content={content} updateContent={updateContent} saveToCloud={saveToCloud} saveStatus={saveStatus} />}
         </div>
       </main>
 
@@ -257,6 +258,30 @@ function ImageUpload({ label, value, onChange, onClear }) {
   );
 }
 
+/* Save Button — shown at the bottom of every tab */
+function SaveButton({ saveToCloud, saveStatus }) {
+  return (
+    <div className="admin-save-section">
+      <button
+        className="btn btn-primary admin-save-btn"
+        onClick={saveToCloud}
+        disabled={saveStatus === 'saving'}
+      >
+        {saveStatus === 'saving' ? (
+          <><span className="admin-loading-spinner-small" /> Menyimpan...</>
+        ) : saveStatus === 'saved' ? (
+          <><Check size={16} /> Tersimpan!</>
+        ) : (
+          <><Save size={16} /> Simpan Perubahan</>
+        )}
+      </button>
+      {saveStatus === 'error' && (
+        <p className="admin-save-error-text">Gagal menyimpan ke server. Coba lagi.</p>
+      )}
+    </div>
+  );
+}
+
 /* ===== TAB: OVERVIEW ===== */
 
 function OverviewTab({ content }) {
@@ -312,75 +337,84 @@ function OverviewTab({ content }) {
 
 /* ===== TAB: HERO ===== */
 
-function HeroTab({ content, updateContent }) {
+function HeroTab({ content, updateContent, saveToCloud, saveStatus }) {
   const { hero } = content;
   const update = (key, val) => updateContent('hero', prev => ({ ...prev, [key]: val }));
 
   return (
-    <div className="admin-section-card">
-      <h3>🏠 Konten Hero Section (Beranda)</h3>
-      <ImageUpload
-        label="Gambar Background Hero"
-        value={hero.image}
-        onChange={(url) => update('image', url)}
-        onClear={() => update('image', '')}
-      />
-      <FieldGroup label="Badge / Label Kecil">
-        <input className="admin-input" value={hero.badge} onChange={e => update('badge', e.target.value)} />
-      </FieldGroup>
-      <FieldGroup label="Headline Utama">
-        <input className="admin-input" value={hero.headline} onChange={e => update('headline', e.target.value)} />
-      </FieldGroup>
-      <FieldGroup label="Subtitle / Deskripsi">
-        <textarea className="admin-textarea" rows={3} value={hero.subtitle} onChange={e => update('subtitle', e.target.value)} />
-      </FieldGroup>
+    <div>
+      <div className="admin-section-card">
+        <h3>🏠 Konten Hero Section (Beranda)</h3>
+        <ImageUpload
+          label="Gambar Background Hero"
+          value={hero.image}
+          onChange={(url) => update('image', url)}
+          onClear={() => update('image', '')}
+        />
+        <FieldGroup label="Badge / Label Kecil">
+          <input className="admin-input" value={hero.badge} onChange={e => update('badge', e.target.value)} />
+        </FieldGroup>
+        <FieldGroup label="Headline Utama">
+          <input className="admin-input" value={hero.headline} onChange={e => update('headline', e.target.value)} />
+        </FieldGroup>
+        <FieldGroup label="Subtitle / Deskripsi">
+          <textarea className="admin-textarea" rows={3} value={hero.subtitle} onChange={e => update('subtitle', e.target.value)} />
+        </FieldGroup>
+      </div>
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }
 
 /* ===== TAB: STATS ===== */
 
-function StatsTab({ content, updateContent }) {
+function StatsTab({ content, updateContent, saveToCloud, saveStatus }) {
   const { stats } = content;
   const update = (key, val) => updateContent('stats', prev => ({ ...prev, [key]: val }));
 
   return (
-    <div className="admin-section-card">
-      <h3>📊 Statistik Sekolah</h3>
-      <div className="admin-field-row">
-        <FieldGroup label="Alumni Berprestasi">
-          <input className="admin-input" value={stats.alumni} onChange={e => update('alumni', e.target.value)} />
-        </FieldGroup>
-        <FieldGroup label="Tenaga Pendidik">
-          <input className="admin-input" value={stats.teachers} onChange={e => update('teachers', e.target.value)} />
-        </FieldGroup>
-        <FieldGroup label="Tahun Berdiri">
-          <input className="admin-input" value={stats.years} onChange={e => update('years', e.target.value)} />
-        </FieldGroup>
+    <div>
+      <div className="admin-section-card">
+        <h3>📊 Statistik Sekolah</h3>
+        <div className="admin-field-row">
+          <FieldGroup label="Alumni Berprestasi">
+            <input className="admin-input" value={stats.alumni} onChange={e => update('alumni', e.target.value)} />
+          </FieldGroup>
+          <FieldGroup label="Tenaga Pendidik">
+            <input className="admin-input" value={stats.teachers} onChange={e => update('teachers', e.target.value)} />
+          </FieldGroup>
+          <FieldGroup label="Tahun Berdiri">
+            <input className="admin-input" value={stats.years} onChange={e => update('years', e.target.value)} />
+          </FieldGroup>
+        </div>
       </div>
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }
 
 /* ===== TAB: OVERVIEW SECTION ===== */
 
-function OverviewSectionTab({ content, updateContent }) {
+function OverviewSectionTab({ content, updateContent, saveToCloud, saveStatus }) {
   return (
-    <div className="admin-section-card">
-      <h3>⭐ Section Keunggulan Kami</h3>
-      <FieldGroup label="Judul Section">
-        <input className="admin-input" value={content.overviewTitle} onChange={e => updateContent('overviewTitle', e.target.value)} />
-      </FieldGroup>
-      <FieldGroup label="Deskripsi Section">
-        <textarea className="admin-textarea" rows={3} value={content.overviewDesc} onChange={e => updateContent('overviewDesc', e.target.value)} />
-      </FieldGroup>
+    <div>
+      <div className="admin-section-card">
+        <h3>⭐ Section Keunggulan Kami</h3>
+        <FieldGroup label="Judul Section">
+          <input className="admin-input" value={content.overviewTitle} onChange={e => updateContent('overviewTitle', e.target.value)} />
+        </FieldGroup>
+        <FieldGroup label="Deskripsi Section">
+          <textarea className="admin-textarea" rows={3} value={content.overviewDesc} onChange={e => updateContent('overviewDesc', e.target.value)} />
+        </FieldGroup>
+      </div>
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }
 
 /* ===== TAB: VISI MISI ===== */
 
-function VisiMisiTab({ content, updateContent }) {
+function VisiMisiTab({ content, updateContent, saveToCloud, saveStatus }) {
   const handleMisiChange = (index, value) => {
     updateContent('misi', prev => {
       const newMisi = [...prev];
@@ -412,13 +446,14 @@ function VisiMisiTab({ content, updateContent }) {
           + Tambah Misi
         </button>
       </div>
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }
 
 /* ===== TAB: FASILITAS ===== */
 
-function FasilitasTab({ content, updateContent }) {
+function FasilitasTab({ content, updateContent, saveToCloud, saveStatus }) {
   const facilities = content.facilities || [];
   const defaultImages = ['/images/facilities.png', '/images/classroom.png', '/images/hero-school.png'];
 
@@ -453,13 +488,14 @@ function FasilitasTab({ content, updateContent }) {
           </FieldGroup>
         </div>
       ))}
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }
 
 /* ===== TAB: GALLERY ===== */
 
-function GalleryTab({ content, updateContent }) {
+function GalleryTab({ content, updateContent, saveToCloud, saveStatus }) {
   const gallery = content.gallery || [];
 
   const updatePhoto = (index, key, value) => {
@@ -521,13 +557,14 @@ function GalleryTab({ content, updateContent }) {
       <button className="btn btn-primary btn-sm" onClick={addPhoto} style={{ marginTop: '8px' }}>
         <Plus size={14} /> Tambah Foto
       </button>
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }
 
 /* ===== TAB: EXTRACURRICULAR ===== */
 
-function ExtracurricularTab({ content, updateContent }) {
+function ExtracurricularTab({ content, updateContent, saveToCloud, saveStatus }) {
   const items = content.extracurriculars || [];
   const iconOptions = Object.keys(ICON_MAP);
 
@@ -593,13 +630,14 @@ function ExtracurricularTab({ content, updateContent }) {
       <button className="btn btn-primary btn-sm" onClick={addItem} style={{ marginTop: '8px' }}>
         <Plus size={14} /> Tambah Ekstrakurikuler
       </button>
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }
 
 /* ===== TAB: CALENDAR ===== */
 
-function CalendarTab({ content, updateContent }) {
+function CalendarTab({ content, updateContent, saveToCloud, saveStatus }) {
   const calendar = content.calendar || [];
 
   const updateEvent = (index, key, value) => {
@@ -648,13 +686,14 @@ function CalendarTab({ content, updateContent }) {
       <button className="btn btn-primary btn-sm" onClick={addEvent} style={{ marginTop: '8px' }}>
         <Plus size={14} /> Tambah Jadwal
       </button>
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }
 
 /* ===== TAB: POPUP / IKLAN ===== */
 
-function PopupTab({ content, updateContent }) {
+function PopupTab({ content, updateContent, saveToCloud, saveStatus }) {
   const popup = content.popup || {};
   const update = (key, val) => updateContent('popup', prev => ({ ...prev, [key]: val }));
 
@@ -740,13 +779,14 @@ function PopupTab({ content, updateContent }) {
           </div>
         </div>
       )}
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }
 
 /* ===== TAB: ABOUT (Expanded with Teachers, Facilities, Gallery) ===== */
 
-function AboutTab({ content, updateContent }) {
+function AboutTab({ content, updateContent, saveToCloud, saveStatus }) {
   const teachers = content.teachers || [];
   const aboutFacilities = content.aboutFacilities || [];
   const aboutGallery = content.aboutGallery || [];
@@ -972,13 +1012,14 @@ function AboutTab({ content, updateContent }) {
       <button className="btn btn-primary btn-sm" onClick={addAboutGalleryItem} style={{ marginTop: '8px' }}>
         <Plus size={14} /> Tambah Foto Galeri
       </button>
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }
 
 /* ===== TAB: TESTIMONIALS (NEW) ===== */
 
-function TestimonialsTab({ content, updateContent }) {
+function TestimonialsTab({ content, updateContent, saveToCloud, saveStatus }) {
   const testimonials = content.testimonials || [];
 
   const updateTestimonial = (index, key, value) => {
@@ -1087,68 +1128,75 @@ function TestimonialsTab({ content, updateContent }) {
           ⚠️ Jumlah testimoni sudah mencapai batas maksimal ({MAX_TESTIMONIALS}).
         </p>
       )}
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }
 
 /* ===== TAB: CONTACT ===== */
 
-function ContactTab({ content, updateContent }) {
+function ContactTab({ content, updateContent, saveToCloud, saveStatus }) {
   const { contact } = content;
   const update = (key, val) => updateContent('contact', prev => ({ ...prev, [key]: val }));
 
   return (
-    <div className="admin-section-card">
-      <h3>📞 Informasi Kontak</h3>
-      <div className="admin-field-row">
-        <FieldGroup label="No. Telepon / WhatsApp">
-          <input className="admin-input" value={contact.phone} onChange={e => update('phone', e.target.value)} />
+    <div>
+      <div className="admin-section-card">
+        <h3>📞 Informasi Kontak</h3>
+        <div className="admin-field-row">
+          <FieldGroup label="No. Telepon / WhatsApp">
+            <input className="admin-input" value={contact.phone} onChange={e => update('phone', e.target.value)} />
+          </FieldGroup>
+          <FieldGroup label="Email">
+            <input className="admin-input" type="email" value={contact.email} onChange={e => update('email', e.target.value)} />
+          </FieldGroup>
+        </div>
+        <FieldGroup label="Alamat Lengkap">
+          <textarea className="admin-textarea" rows={2} value={contact.address} onChange={e => update('address', e.target.value)} />
         </FieldGroup>
-        <FieldGroup label="Email">
-          <input className="admin-input" type="email" value={contact.email} onChange={e => update('email', e.target.value)} />
+        <FieldGroup label="Nomor WhatsApp (kode negara, tanpa +)">
+          <input className="admin-input" value={contact.whatsapp} onChange={e => update('whatsapp', e.target.value)} placeholder="6283808417406" />
         </FieldGroup>
+        <div className="admin-field-row">
+          <FieldGroup label="URL Instagram">
+            <input className="admin-input" value={contact.instagram} onChange={e => update('instagram', e.target.value)} />
+          </FieldGroup>
+          <FieldGroup label="URL Facebook">
+            <input className="admin-input" value={contact.facebook} onChange={e => update('facebook', e.target.value)} />
+          </FieldGroup>
+        </div>
       </div>
-      <FieldGroup label="Alamat Lengkap">
-        <textarea className="admin-textarea" rows={2} value={contact.address} onChange={e => update('address', e.target.value)} />
-      </FieldGroup>
-      <FieldGroup label="Nomor WhatsApp (kode negara, tanpa +)">
-        <input className="admin-input" value={contact.whatsapp} onChange={e => update('whatsapp', e.target.value)} placeholder="6283808417406" />
-      </FieldGroup>
-      <div className="admin-field-row">
-        <FieldGroup label="URL Instagram">
-          <input className="admin-input" value={contact.instagram} onChange={e => update('instagram', e.target.value)} />
-        </FieldGroup>
-        <FieldGroup label="URL Facebook">
-          <input className="admin-input" value={contact.facebook} onChange={e => update('facebook', e.target.value)} />
-        </FieldGroup>
-      </div>
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }
 
 /* ===== TAB: PPDB ===== */
 
-function PPDBTab({ content, updateContent }) {
+function PPDBTab({ content, updateContent, saveToCloud, saveStatus }) {
   const { ppdb } = content;
   const update = (key, val) => updateContent('ppdb', prev => ({ ...prev, [key]: val }));
 
   return (
-    <div className="admin-section-card">
-      <h3>📝 Informasi PPDB</h3>
-      <div className="admin-field-row">
-        <FieldGroup label="Tanggal Mulai">
-          <input className="admin-input" value={ppdb.startDate} onChange={e => update('startDate', e.target.value)} />
+    <div>
+      <div className="admin-section-card">
+        <h3>📝 Informasi PPDB</h3>
+        <div className="admin-field-row">
+          <FieldGroup label="Tanggal Mulai">
+            <input className="admin-input" value={ppdb.startDate} onChange={e => update('startDate', e.target.value)} />
+          </FieldGroup>
+          <FieldGroup label="Tanggal Selesai">
+            <input className="admin-input" value={ppdb.endDate} onChange={e => update('endDate', e.target.value)} />
+          </FieldGroup>
+        </div>
+        <FieldGroup label="Gelombang">
+          <input className="admin-input" value={ppdb.wave} onChange={e => update('wave', e.target.value)} />
         </FieldGroup>
-        <FieldGroup label="Tanggal Selesai">
-          <input className="admin-input" value={ppdb.endDate} onChange={e => update('endDate', e.target.value)} />
+        <FieldGroup label="Kuota">
+          <input className="admin-input" value={ppdb.quota} onChange={e => update('quota', e.target.value)} />
         </FieldGroup>
       </div>
-      <FieldGroup label="Gelombang">
-        <input className="admin-input" value={ppdb.wave} onChange={e => update('wave', e.target.value)} />
-      </FieldGroup>
-      <FieldGroup label="Kuota">
-        <input className="admin-input" value={ppdb.quota} onChange={e => update('quota', e.target.value)} />
-      </FieldGroup>
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }
@@ -1161,7 +1209,7 @@ function extractInstagramPostId(url) {
   return match ? match[1] : null;
 }
 
-function InstagramTab({ content, updateContent }) {
+function InstagramTab({ content, updateContent, saveToCloud, saveStatus }) {
   const handleChange = (index, value) => {
     updateContent('instagramPosts', prev => {
       const newPosts = [...prev];
@@ -1218,6 +1266,7 @@ function InstagramTab({ content, updateContent }) {
           + Tambah Postingan
         </button>
       </div>
+      <SaveButton saveToCloud={saveToCloud} saveStatus={saveStatus} />
     </div>
   );
 }

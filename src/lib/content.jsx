@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from './supabase';
 
 const SiteContentContext = createContext(null);
@@ -210,6 +210,7 @@ function mergeWithDefaults(saved) {
     aboutFacilities: saved.aboutFacilities || DEFAULT_CONTENT.aboutFacilities,
     aboutGallery: saved.aboutGallery || DEFAULT_CONTENT.aboutGallery,
     testimonials: saved.testimonials || DEFAULT_CONTENT.testimonials,
+    instagramPosts: saved.instagramPosts || DEFAULT_CONTENT.instagramPosts,
   };
 }
 
@@ -231,14 +232,14 @@ async function fetchContentFromSupabase() {
 }
 
 // Save content to Supabase
-async function saveContentToSupabase(content) {
+async function saveContentToSupabase(contentData) {
   if (!supabase) return false;
   try {
     const { error } = await supabase
       .from('site_content')
       .upsert({
         id: 'main',
-        content: content,
+        content: contentData,
         updated_at: new Date().toISOString(),
       });
     if (error) throw error;
@@ -253,6 +254,13 @@ export function SiteContentProvider({ children }) {
   const [content, setContent] = useState(DEFAULT_CONTENT);
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState('idle'); // idle | saving | saved | error
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const contentRef = useRef(content);
+
+  // Keep ref in sync
+  useEffect(() => {
+    contentRef.current = content;
+  }, [content]);
 
   // Load content: try Supabase first, then localStorage fallback
   useEffect(() => {
@@ -264,7 +272,10 @@ export function SiteContentProvider({ children }) {
       if (cancelled) return;
 
       if (cloudContent && Object.keys(cloudContent).length > 0) {
-        setContent(mergeWithDefaults(cloudContent));
+        const merged = mergeWithDefaults(cloudContent);
+        setContent(merged);
+        // Also cache to localStorage
+        localStorage.setItem('umais_site_content', JSON.stringify(merged));
         setLoading(false);
         return;
       }
@@ -274,11 +285,12 @@ export function SiteContentProvider({ children }) {
         const saved = localStorage.getItem('umais_site_content');
         if (saved) {
           const parsed = JSON.parse(saved);
-          setContent(mergeWithDefaults(parsed));
+          const merged = mergeWithDefaults(parsed);
+          setContent(merged);
 
           // If localStorage has data but Supabase is empty, sync up to Supabase
           if (supabase && Object.keys(parsed).length > 0) {
-            await saveContentToSupabase(mergeWithDefaults(parsed));
+            await saveContentToSupabase(merged);
           }
         }
       } catch {
@@ -292,42 +304,60 @@ export function SiteContentProvider({ children }) {
     return () => { cancelled = true; };
   }, []);
 
-  // Save content to both Supabase and localStorage
-  const saveContent = useCallback(async (newContent) => {
-    // Always save to localStorage as cache
-    localStorage.setItem('umais_site_content', JSON.stringify(newContent));
-
-    // Save to Supabase for cross-network access
-    if (supabase) {
-      setSaveStatus('saving');
-      const success = await saveContentToSupabase(newContent);
-      setSaveStatus(success ? 'saved' : 'error');
-      setTimeout(() => setSaveStatus('idle'), 2000);
-    }
-  }, []);
-
+  // updateContent: updates local state only (no cloud save yet)
   const updateContent = useCallback((section, data) => {
     setContent(prev => {
       const newContent = {
         ...prev,
         [section]: typeof data === 'function' ? data(prev[section]) : data,
       };
-      // Auto-save to Supabase & localStorage
-      saveContent(newContent);
+      // Save to localStorage immediately as cache
+      localStorage.setItem('umais_site_content', JSON.stringify(newContent));
       return newContent;
     });
-  }, [saveContent]);
+    setHasUnsavedChanges(true);
+  }, []);
+
+  // saveToCloud: explicit save to Supabase (triggered by "Simpan Perubahan" button)
+  const saveToCloud = useCallback(async () => {
+    const currentContent = contentRef.current;
+    setSaveStatus('saving');
+
+    // Always update localStorage
+    localStorage.setItem('umais_site_content', JSON.stringify(currentContent));
+
+    if (supabase) {
+      const success = await saveContentToSupabase(currentContent);
+      setSaveStatus(success ? 'saved' : 'error');
+      if (success) setHasUnsavedChanges(false);
+      setTimeout(() => setSaveStatus('idle'), 3000);
+      return success;
+    } else {
+      // No Supabase, just localStorage
+      setSaveStatus('saved');
+      setHasUnsavedChanges(false);
+      setTimeout(() => setSaveStatus('idle'), 3000);
+      return true;
+    }
+  }, []);
 
   const resetContent = useCallback(async () => {
     setContent(DEFAULT_CONTENT);
     localStorage.removeItem('umais_site_content');
+    setHasUnsavedChanges(false);
     if (supabase) {
-      await saveContentToSupabase(DEFAULT_CONTENT);
+      setSaveStatus('saving');
+      const success = await saveContentToSupabase(DEFAULT_CONTENT);
+      setSaveStatus(success ? 'saved' : 'error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
     }
   }, []);
 
   return (
-    <SiteContentContext.Provider value={{ content, updateContent, resetContent, DEFAULT_CONTENT, loading, saveStatus }}>
+    <SiteContentContext.Provider value={{
+      content, updateContent, resetContent, saveToCloud,
+      DEFAULT_CONTENT, loading, saveStatus, hasUnsavedChanges
+    }}>
       {children}
     </SiteContentContext.Provider>
   );
@@ -335,6 +365,14 @@ export function SiteContentProvider({ children }) {
 
 export function useSiteContent() {
   const ctx = useContext(SiteContentContext);
-  if (!ctx) return { content: DEFAULT_CONTENT, updateContent: () => {}, resetContent: () => {}, loading: false, saveStatus: 'idle' };
+  if (!ctx) return {
+    content: DEFAULT_CONTENT,
+    updateContent: () => {},
+    resetContent: () => {},
+    saveToCloud: async () => true,
+    loading: false,
+    saveStatus: 'idle',
+    hasUnsavedChanges: false,
+  };
   return ctx;
 }
