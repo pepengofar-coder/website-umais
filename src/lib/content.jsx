@@ -3,8 +3,9 @@ import { supabase } from './supabase';
 
 const SiteContentContext = createContext(null);
 
-// Maximum file size: 1MB (1000KB)
-export const MAX_FILE_SIZE = 1000 * 1024; // 1,000 KB = ~1MB
+// File size limits
+export const MIN_FILE_SIZE = 25 * 1024;   // 25 KB minimum
+export const MAX_FILE_SIZE = 1000 * 1024;  // 1,000 KB (~1MB) maximum
 export const MAX_TESTIMONIALS = 15;
 
 const DEFAULT_CONTENT = {
@@ -169,13 +170,19 @@ const DEFAULT_CONTENT = {
   ],
 };
 
-// Helper: validate file size (max 1MB / 1000KB)
+// Helper: validate file size (min 25KB, max 1000KB)
 export function validateFileSize(file) {
-  if (file.size > MAX_FILE_SIZE) {
-    const sizeMB = (file.size / 1024).toFixed(0);
+  const sizeKB = (file.size / 1024).toFixed(0);
+  if (file.size < MIN_FILE_SIZE) {
     return {
       valid: false,
-      error: `Ukuran file terlalu besar (${sizeMB}KB). Maksimal 1000KB (1MB).`,
+      error: `Ukuran file terlalu kecil (${sizeKB}KB). Minimal 25KB.`,
+    };
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    return {
+      valid: false,
+      error: `Ukuran file terlalu besar (${sizeKB}KB). Maksimal 1000KB (1MB).`,
     };
   }
   return { valid: true, error: null };

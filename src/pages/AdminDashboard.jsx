@@ -236,7 +236,7 @@ function ImageUpload({ label, value, onChange, onClear }) {
           Pilih Gambar
           <input type="file" accept="image/*" onChange={handleFile} hidden />
         </label>
-        <span className="admin-upload-hint">Maks. 1MB</span>
+        <span className="admin-upload-hint">25KB — 1MB</span>
         {value && (
           <button className="admin-upload-clear" onClick={() => { onClear(); setError(null); }} title="Hapus gambar">
             <Trash2 size={14} /> Hapus
@@ -327,7 +327,7 @@ function OverviewTab({ content }) {
           <li>ℹ️ <strong>Tentang Kami:</strong> Edit profil guru, fasilitas, & galeri sekolah</li>
           <li>💬 <strong>Testimoni:</strong> Kelola testimoni wali murid (maks. {MAX_TESTIMONIALS})</li>
           <li>📸 <strong>Instagram Posts:</strong> Kelola link postingan Instagram dengan preview</li>
-          <li>⚠️ <strong>Upload:</strong> Ukuran gambar maksimal <strong>1MB (1000KB)</strong></li>
+          <li>⚠️ <strong>Upload:</strong> Ukuran gambar <strong>minimal 25KB, maksimal 1MB (1000KB)</strong></li>
           <li>Klik <strong>"Lihat Website"</strong> untuk melihat hasil perubahan</li>
         </ul>
       </div>
