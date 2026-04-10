@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { supabase } from './supabase';
 
 const SiteContentContext = createContext(null);
 
@@ -58,7 +59,6 @@ const DEFAULT_CONTENT = {
   overviewTitle: 'Sekolah Islam Kreatif untuk Muslimah Masa Depan',
   overviewDesc: 'SMP UMAIS Bogor hadir sebagai wadah pendidikan yang membentuk generasi muslimah cerdas, berakhlak, dan siap menghadapi tantangan global.',
 
-  // === NEW: Gallery photos ===
   gallery: [
     { image: '/images/hero-school.png', caption: 'Kampus SMP UMAIS Bogor', category: 'Sekolah' },
     { image: '/images/classroom.png', caption: 'Kegiatan Belajar Mengajar', category: 'Akademik' },
@@ -68,7 +68,6 @@ const DEFAULT_CONTENT = {
     { image: '/images/facilities.png', caption: 'Wisuda & Kelulusan', category: 'Acara' },
   ],
 
-  // === NEW: Academic calendar ===
   calendar: [
     { month: 'Juli', event: 'Awal Tahun Ajaran', desc: 'Masa Orientasi & Pembukaan' },
     { month: 'September', event: 'UTS Semester 1', desc: 'Ujian Tengah Semester' },
@@ -78,7 +77,6 @@ const DEFAULT_CONTENT = {
     { month: 'Juni', event: 'Wisuda', desc: 'Kelulusan & Pelepasan' },
   ],
 
-  // === NEW: Popup/Banner ===
   popup: {
     enabled: false,
     title: '📢 PPDB 2026/2027 Dibuka!',
@@ -90,7 +88,6 @@ const DEFAULT_CONTENT = {
     bgColor: '#be185d',
   },
 
-  // === NEW: Extracurricular ===
   extracurriculars: [
     { icon: 'Palette', name: 'Seni Kaligrafi', desc: 'Menulis indah huruf Arab' },
     { icon: 'PenTool', name: 'Jurnalistik', desc: 'Menulis & reportase' },
@@ -102,7 +99,6 @@ const DEFAULT_CONTENT = {
     { icon: 'BookOpenCheck', name: 'Tahsin', desc: "Perbaikan bacaan Qur'an" },
   ],
 
-  // === NEW: Teachers (Profil Tenaga Pendidik) ===
   teachers: [
     { name: 'Ustadzah Nurul Hidayah, S.Pd.I', role: 'Kepala Sekolah', subject: 'Manajemen Pendidikan', initial: 'N', image: '', usePhoto: false },
     { name: 'Ustadzah Siti Rahmah, M.Pd', role: 'Wakil Kurikulum', subject: 'Matematika', initial: 'S', image: '', usePhoto: false },
@@ -112,7 +108,6 @@ const DEFAULT_CONTENT = {
     { name: 'Ustadzah Fatimah, S.Pd', role: 'Guru BK', subject: 'Bimbingan Konseling', initial: 'F', image: '', usePhoto: false },
   ],
 
-  // === NEW: About Page Facilities (Fasilitas Unggulan) ===
   aboutFacilities: [
     { icon: 'Landmark', title: 'Musholla', desc: 'Tempat ibadah nyaman untuk sholat jamaah dan kajian rutin.' },
     { icon: 'Sprout', title: 'Gardening', desc: 'Area berkebun dan bercocok tanam untuk pembelajaran sains alam langsung.' },
@@ -122,14 +117,12 @@ const DEFAULT_CONTENT = {
     { icon: 'Award', title: 'Aula Serbaguna', desc: 'Untuk acara sekolah, seminar, dan pentas seni.' },
   ],
 
-  // === NEW: About Page Gallery (Galeri Sekolah Kami) ===
   aboutGallery: [
     { image: '/images/classroom.png', caption: 'Suasana Kelas' },
     { image: '/images/hero-school.png', caption: 'Kampus SMP UMAIS' },
     { image: '/images/facilities.png', caption: 'Fasilitas Sekolah' },
   ],
 
-  // === NEW: Testimonials (Testimoni Wali Murid) ===
   testimonials: [
     {
       text: 'Alhamdulillah, anak saya sangat senang bersekolah di SMP UMAIS. Guru-gurunya sangat perhatian dan lingkungannya sangat Islami.',
@@ -198,54 +191,143 @@ export function fileToDataUrl(file) {
   });
 }
 
-export function SiteContentProvider({ children }) {
-  const [content, setContent] = useState(() => {
-    try {
-      const saved = localStorage.getItem('umais_site_content');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return {
-          ...DEFAULT_CONTENT,
-          ...parsed,
-          hero: { ...DEFAULT_CONTENT.hero, ...(parsed.hero || {}) },
-          stats: { ...DEFAULT_CONTENT.stats, ...(parsed.stats || {}) },
-          contact: { ...DEFAULT_CONTENT.contact, ...(parsed.contact || {}) },
-          ppdb: { ...DEFAULT_CONTENT.ppdb, ...(parsed.ppdb || {}) },
-          popup: { ...DEFAULT_CONTENT.popup, ...(parsed.popup || {}) },
-          facilities: parsed.facilities || DEFAULT_CONTENT.facilities,
-          gallery: parsed.gallery || DEFAULT_CONTENT.gallery,
-          calendar: parsed.calendar || DEFAULT_CONTENT.calendar,
-          extracurriculars: parsed.extracurriculars || DEFAULT_CONTENT.extracurriculars,
-          teachers: parsed.teachers || DEFAULT_CONTENT.teachers,
-          aboutFacilities: parsed.aboutFacilities || DEFAULT_CONTENT.aboutFacilities,
-          aboutGallery: parsed.aboutGallery || DEFAULT_CONTENT.aboutGallery,
-          testimonials: parsed.testimonials || DEFAULT_CONTENT.testimonials,
-        };
-      }
-      return DEFAULT_CONTENT;
-    } catch {
-      return DEFAULT_CONTENT;
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem('umais_site_content', JSON.stringify(content));
-  }, [content]);
-
-  const updateContent = (section, data) => {
-    setContent(prev => ({
-      ...prev,
-      [section]: typeof data === 'function' ? data(prev[section]) : data,
-    }));
+// Deep merge saved content with defaults to ensure new fields are always present
+function mergeWithDefaults(saved) {
+  if (!saved || typeof saved !== 'object') return DEFAULT_CONTENT;
+  return {
+    ...DEFAULT_CONTENT,
+    ...saved,
+    hero: { ...DEFAULT_CONTENT.hero, ...(saved.hero || {}) },
+    stats: { ...DEFAULT_CONTENT.stats, ...(saved.stats || {}) },
+    contact: { ...DEFAULT_CONTENT.contact, ...(saved.contact || {}) },
+    ppdb: { ...DEFAULT_CONTENT.ppdb, ...(saved.ppdb || {}) },
+    popup: { ...DEFAULT_CONTENT.popup, ...(saved.popup || {}) },
+    facilities: saved.facilities || DEFAULT_CONTENT.facilities,
+    gallery: saved.gallery || DEFAULT_CONTENT.gallery,
+    calendar: saved.calendar || DEFAULT_CONTENT.calendar,
+    extracurriculars: saved.extracurriculars || DEFAULT_CONTENT.extracurriculars,
+    teachers: saved.teachers || DEFAULT_CONTENT.teachers,
+    aboutFacilities: saved.aboutFacilities || DEFAULT_CONTENT.aboutFacilities,
+    aboutGallery: saved.aboutGallery || DEFAULT_CONTENT.aboutGallery,
+    testimonials: saved.testimonials || DEFAULT_CONTENT.testimonials,
   };
+}
 
-  const resetContent = () => {
+// Fetch content from Supabase
+async function fetchContentFromSupabase() {
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase
+      .from('site_content')
+      .select('content')
+      .eq('id', 'main')
+      .single();
+    if (error) throw error;
+    return data?.content || null;
+  } catch (err) {
+    console.warn('Failed to fetch content from Supabase:', err.message);
+    return null;
+  }
+}
+
+// Save content to Supabase
+async function saveContentToSupabase(content) {
+  if (!supabase) return false;
+  try {
+    const { error } = await supabase
+      .from('site_content')
+      .upsert({
+        id: 'main',
+        content: content,
+        updated_at: new Date().toISOString(),
+      });
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Failed to save content to Supabase:', err.message);
+    return false;
+  }
+}
+
+export function SiteContentProvider({ children }) {
+  const [content, setContent] = useState(DEFAULT_CONTENT);
+  const [loading, setLoading] = useState(true);
+  const [saveStatus, setSaveStatus] = useState('idle'); // idle | saving | saved | error
+
+  // Load content: try Supabase first, then localStorage fallback
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadContent() {
+      // 1. Try Supabase (cloud — visible to all users)
+      const cloudContent = await fetchContentFromSupabase();
+      if (cancelled) return;
+
+      if (cloudContent && Object.keys(cloudContent).length > 0) {
+        setContent(mergeWithDefaults(cloudContent));
+        setLoading(false);
+        return;
+      }
+
+      // 2. Fallback to localStorage (for development without Supabase)
+      try {
+        const saved = localStorage.getItem('umais_site_content');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setContent(mergeWithDefaults(parsed));
+
+          // If localStorage has data but Supabase is empty, sync up to Supabase
+          if (supabase && Object.keys(parsed).length > 0) {
+            await saveContentToSupabase(mergeWithDefaults(parsed));
+          }
+        }
+      } catch {
+        // Use defaults
+      }
+
+      if (!cancelled) setLoading(false);
+    }
+
+    loadContent();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Save content to both Supabase and localStorage
+  const saveContent = useCallback(async (newContent) => {
+    // Always save to localStorage as cache
+    localStorage.setItem('umais_site_content', JSON.stringify(newContent));
+
+    // Save to Supabase for cross-network access
+    if (supabase) {
+      setSaveStatus('saving');
+      const success = await saveContentToSupabase(newContent);
+      setSaveStatus(success ? 'saved' : 'error');
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    }
+  }, []);
+
+  const updateContent = useCallback((section, data) => {
+    setContent(prev => {
+      const newContent = {
+        ...prev,
+        [section]: typeof data === 'function' ? data(prev[section]) : data,
+      };
+      // Auto-save to Supabase & localStorage
+      saveContent(newContent);
+      return newContent;
+    });
+  }, [saveContent]);
+
+  const resetContent = useCallback(async () => {
     setContent(DEFAULT_CONTENT);
     localStorage.removeItem('umais_site_content');
-  };
+    if (supabase) {
+      await saveContentToSupabase(DEFAULT_CONTENT);
+    }
+  }, []);
 
   return (
-    <SiteContentContext.Provider value={{ content, updateContent, resetContent, DEFAULT_CONTENT }}>
+    <SiteContentContext.Provider value={{ content, updateContent, resetContent, DEFAULT_CONTENT, loading, saveStatus }}>
       {children}
     </SiteContentContext.Provider>
   );
@@ -253,6 +335,6 @@ export function SiteContentProvider({ children }) {
 
 export function useSiteContent() {
   const ctx = useContext(SiteContentContext);
-  if (!ctx) return { content: DEFAULT_CONTENT, updateContent: () => {}, resetContent: () => {} };
+  if (!ctx) return { content: DEFAULT_CONTENT, updateContent: () => {}, resetContent: () => {}, loading: false, saveStatus: 'idle' };
   return ctx;
 }

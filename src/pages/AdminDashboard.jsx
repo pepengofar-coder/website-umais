@@ -102,15 +102,18 @@ const TABS = [
 
 export default function AdminDashboard() {
   const { logout } = useAuth();
-  const { content, updateContent, resetContent } = useSiteContent();
+  const { content, updateContent, resetContent, loading, saveStatus } = useSiteContent();
   const [activeTab, setActiveTab] = useState('overview');
-  const [saved, setSaved] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const showSaved = () => {
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
-  };
+  if (loading) {
+    return (
+      <div className="admin-loading">
+        <div className="admin-loading-spinner" />
+        <p>Memuat konten dari server...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="admin-layout">
@@ -159,12 +162,11 @@ export default function AdminDashboard() {
         <div className="admin-topbar">
           <h1>{TABS.find(t => t.id === activeTab)?.label || 'Dashboard'}</h1>
           <div className="admin-topbar-actions">
-            {saved && <span className="admin-saved-badge"><Check size={14} /> Tersimpan!</span>}
+            {saveStatus === 'saving' && <span className="admin-saved-badge admin-saving">⏳ Menyimpan...</span>}
+            {saveStatus === 'saved' && <span className="admin-saved-badge"><Check size={14} /> Tersimpan ke cloud!</span>}
+            {saveStatus === 'error' && <span className="admin-saved-badge admin-save-error">❌ Gagal menyimpan</span>}
             <button className="btn btn-outline-pink btn-sm" onClick={resetContent}>
               <RotateCcw size={14} /> Reset Default
-            </button>
-            <button className="btn btn-primary btn-sm" onClick={showSaved}>
-              <Save size={14} /> Simpan
             </button>
           </div>
         </div>
