@@ -443,6 +443,13 @@
   background: var(--pink-100);
   border-color: var(--pink-500);
 }
+.admin-upload-btn.uploading {
+  background: #fef3c7;
+  border-color: #fbbf24;
+  color: #92400e;
+  cursor: wait;
+  pointer-events: none;
+}
 
 .admin-upload-hint {
   font-size: 0.75rem;
