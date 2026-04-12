@@ -275,6 +275,7 @@ export function SiteContentProvider({ children }) {
   // Load content: try Supabase first, then localStorage fallback
   useEffect(() => {
     let cancelled = false;
+    let channel = null;
 
     async function loadContent() {
       // 1. Try Supabase (cloud — visible to all users)
@@ -287,31 +288,62 @@ export function SiteContentProvider({ children }) {
         // Also cache to localStorage
         localStorage.setItem('umais_site_content', JSON.stringify(merged));
         setLoading(false);
-        return;
-      }
+      } else {
+        // 2. Fallback to localStorage (for development without Supabase)
+        try {
+          const saved = localStorage.getItem('umais_site_content');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            const merged = mergeWithDefaults(parsed);
+            setContent(merged);
 
-      // 2. Fallback to localStorage (for development without Supabase)
-      try {
-        const saved = localStorage.getItem('umais_site_content');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          const merged = mergeWithDefaults(parsed);
-          setContent(merged);
-
-          // If localStorage has data but Supabase is empty, sync up to Supabase
-          if (supabase && Object.keys(parsed).length > 0) {
-            await saveContentToSupabase(merged);
+            // If localStorage has data but Supabase is empty, sync up to Supabase
+            if (supabase && Object.keys(parsed).length > 0) {
+              await saveContentToSupabase(merged);
+            }
           }
+        } catch {
+          // Use defaults
         }
-      } catch {
-        // Use defaults
+        if (!cancelled) setLoading(false);
       }
 
-      if (!cancelled) setLoading(false);
+      // 3. Setup real-time listener for cross-device sync
+      if (supabase && !cancelled) {
+        channel = supabase
+          .channel('site_content_changes')
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'site_content',
+              filter: 'id=eq.main',
+            },
+            (payload) => {
+              if (payload.new && payload.new.content) {
+                const merged = mergeWithDefaults(payload.new.content);
+                setContent(merged);
+                localStorage.setItem('umais_site_content', JSON.stringify(merged));
+              }
+            }
+          )
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED' && !cancelled) {
+              console.log('Realtime sync enabled.');
+            }
+          });
+      }
     }
 
     loadContent();
-    return () => { cancelled = true; };
+    
+    return () => { 
+      cancelled = true; 
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, []);
 
   // Cleanup auto-save timer on unmount
