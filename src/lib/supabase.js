@@ -1,17 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Public anon key — safe to include in client-side code (protected by RLS policies)
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://xckcepsallcbruluoovx.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhja2NlcHNhbGxjYnJ1bHVvb3Z4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1OTc5MjQsImV4cCI6MjA5MTE3MzkyNH0.tx5r53L9PQsaxl23_kdvun3WnxfhzmQtNScv-S_GBdE';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    'Supabase credentials not found. PPDB form submissions will redirect to WhatsApp only.'
-  );
-}
-
-export const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 /**
  * Upload an image to Supabase Storage bucket 'image'.
@@ -21,10 +14,6 @@ export const supabase = supabaseUrl && supabaseAnonKey
  * @returns {Promise<{url: string|null, error: string|null}>}
  */
 export async function uploadImage(file, folder = 'general') {
-  if (!supabase) {
-    return { url: null, error: 'Supabase tidak terkonfigurasi.' };
-  }
-
   try {
     // Generate unique filename: folder/timestamp_randomhex_originalname
     const timestamp = Date.now();
@@ -64,7 +53,7 @@ export async function uploadImage(file, folder = 'general') {
  * @returns {Promise<boolean>}
  */
 export async function deleteImage(publicUrl) {
-  if (!supabase || !publicUrl) return false;
+  if (!publicUrl) return false;
 
   try {
     // Extract path from URL: .../storage/v1/object/public/image/FILEPATH
@@ -90,11 +79,6 @@ export async function deleteImage(publicUrl) {
  * Submit PPDB registration to Supabase
  */
 export async function submitPPDBRegistration(data) {
-  if (!supabase) {
-    console.warn('Supabase not configured. Skipping database submission.');
-    return { success: false, reason: 'no-supabase' };
-  }
-
   try {
     const { data: result, error } = await supabase
       .from('ppdb_registrations')
