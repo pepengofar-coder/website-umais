@@ -378,6 +378,7 @@ function HeroTab({ content, updateContent, saveToCloud, saveStatus }) {
           value={hero.image}
           onChange={(url) => update('image', url)}
           onClear={() => update('image', '')}
+          folder="hero"
         />
         <FieldGroup label="Badge / Label Kecil">
           <input className="admin-input" value={hero.badge} onChange={e => update('badge', e.target.value)} />
@@ -506,6 +507,7 @@ function FasilitasTab({ content, updateContent, saveToCloud, saveStatus }) {
             value={fac.image}
             onChange={(url) => updateFacility(i, 'image', url)}
             onClear={() => updateFacility(i, 'image', '')}
+            folder="facilities"
           />
           {!fac.image && <p className="admin-hint">Default: {defaultImages[i]}</p>}
           <FieldGroup label="Judul">
@@ -560,6 +562,7 @@ function GalleryTab({ content, updateContent, saveToCloud, saveStatus }) {
             value={photo.image}
             onChange={(url) => updatePhoto(i, 'image', url)}
             onClear={() => updatePhoto(i, 'image', '')}
+            folder="gallery"
           />
 
           <div className="admin-field-row">
@@ -755,6 +758,7 @@ function PopupTab({ content, updateContent, saveToCloud, saveStatus }) {
           value={popup.image}
           onChange={(url) => update('image', url)}
           onClear={() => update('image', '')}
+          folder="popup"
         />
 
         <FieldGroup label="Judul">
@@ -875,6 +879,7 @@ function AboutTab({ content, updateContent, saveToCloud, saveStatus }) {
           value={content.aboutImage}
           onChange={(url) => updateContent('aboutImage', url)}
           onClear={() => updateContent('aboutImage', '')}
+          folder="about"
         />
         <FieldGroup label="Deskripsi Tentang Sekolah">
           <textarea className="admin-textarea" rows={5} value={content.aboutDesc} onChange={e => updateContent('aboutDesc', e.target.value)} />
@@ -929,6 +934,7 @@ function AboutTab({ content, updateContent, saveToCloud, saveStatus }) {
               value={teacher.image}
               onChange={(url) => updateTeacher(i, 'image', url)}
               onClear={() => updateTeacher(i, 'image', '')}
+              folder="teachers"
             />
           ) : (
             <FieldGroup label="Initial (1 huruf)">
@@ -1029,6 +1035,7 @@ function AboutTab({ content, updateContent, saveToCloud, saveStatus }) {
             value={item.image}
             onChange={(url) => updateAboutGalleryItem(i, 'image', url)}
             onClear={() => updateAboutGalleryItem(i, 'image', '')}
+            folder="about-gallery"
           />
 
           <FieldGroup label="Caption / Judul">
@@ -1108,6 +1115,7 @@ function TestimonialsTab({ content, updateContent, saveToCloud, saveStatus }) {
             value={item.image}
             onChange={(url) => updateTestimonial(i, 'image', url)}
             onClear={() => updateTestimonial(i, 'image', '')}
+            folder="testimonials"
           />
 
           <div className="admin-field-row">

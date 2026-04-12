@@ -31,7 +31,7 @@ export default function App() {
               <Route path="/galeri" element={<GalleryPage />} />
               <Route path="/ppdb" element={<PPDBPage />} />
             </Route>
-            <Route path="/admin" element={<AdminRoute />} />
+            <Route path="/admin280292" element={<AdminRoute />} />
           </Routes>
         </BrowserRouter>
       </SiteContentProvider>
