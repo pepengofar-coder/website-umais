@@ -4,8 +4,7 @@ import { supabase } from './supabase';
 const SiteContentContext = createContext(null);
 
 // File size limits
-export const MIN_FILE_SIZE = 25 * 1024;   // 25 KB minimum
-export const MAX_FILE_SIZE = 1000 * 1024;  // 1,000 KB (~1MB) maximum
+export const MAX_FILE_SIZE = 2 * 1024 * 1024;  // 2MB maximum
 export const MAX_TESTIMONIALS = 15;
 
 const DEFAULT_CONTENT = {
@@ -172,19 +171,20 @@ const DEFAULT_CONTENT = {
   ],
 };
 
-// Helper: validate file size (min 25KB, max 1000KB)
+// Helper: validate file size (max 2MB)
 export function validateFileSize(file) {
-  const sizeKB = (file.size / 1024).toFixed(0);
-  if (file.size < MIN_FILE_SIZE) {
-    return {
-      valid: false,
-      error: `Ukuran file terlalu kecil (${sizeKB}KB). Minimal 25KB.`,
-    };
-  }
+  const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
   if (file.size > MAX_FILE_SIZE) {
     return {
       valid: false,
-      error: `Ukuran file terlalu besar (${sizeKB}KB). Maksimal 1000KB (1MB).`,
+      error: `Ukuran file terlalu besar (${sizeMB}MB). Maksimal 2MB.`,
+    };
+  }
+  // Validate that it's actually an image
+  if (!file.type.startsWith('image/')) {
+    return {
+      valid: false,
+      error: 'File harus berupa gambar (JPEG, PNG, WebP, GIF, SVG, dll).',
     };
   }
   return { valid: true, error: null };

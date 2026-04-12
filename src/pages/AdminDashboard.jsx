@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../lib/auth';
-import { useSiteContent, fileToDataUrl, validateFileSize, MAX_FILE_SIZE, MAX_TESTIMONIALS } from '../lib/content';
+import { useSiteContent, validateFileSize, MAX_FILE_SIZE, MAX_TESTIMONIALS } from '../lib/content';
+import { uploadImage, deleteImage } from '../lib/supabase';
 import {
   LayoutDashboard, FileText, Phone, GraduationCap, Eye, Image as ImageIcon,
   LogOut, Save, RotateCcw, Check, Settings, BarChart3, Globe, Upload, Trash2,
@@ -207,14 +208,15 @@ function FieldGroup({ label, children }) {
   );
 }
 
-function ImageUpload({ label, value, onChange, onClear }) {
+function ImageUpload({ label, value, onChange, onClear, folder = 'general' }) {
   const [error, setError] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (max 1MB / 1000KB)
+    // Validate file size (max 2MB) and type
     const validation = validateFileSize(file);
     if (!validation.valid) {
       setError(validation.error);
@@ -223,22 +225,48 @@ function ImageUpload({ label, value, onChange, onClear }) {
     }
 
     setError(null);
-    const dataUrl = await fileToDataUrl(file);
-    onChange(dataUrl);
+    setUploading(true);
+
+    try {
+      const { url, error: uploadError } = await uploadImage(file, folder);
+      if (uploadError) {
+        setError(uploadError);
+      } else if (url) {
+        onChange(url);
+      }
+    } catch (err) {
+      setError('Gagal mengupload gambar. Silakan coba lagi.');
+      console.error('Upload error:', err);
+    } finally {
+      setUploading(false);
+      e.target.value = ''; // Reset input to allow re-upload same file
+    }
+  };
+
+  const handleClear = async () => {
+    // Try to delete from storage if it's a storage URL
+    if (value && value.includes('/storage/v1/object/public/')) {
+      await deleteImage(value);
+    }
+    onClear();
+    setError(null);
   };
 
   return (
     <div className="admin-field">
       <label className="admin-label">{label}</label>
       <div className="admin-upload-area">
-        <label className="admin-upload-btn">
-          <Upload size={16} />
-          Pilih Gambar
-          <input type="file" accept="image/*" onChange={handleFile} hidden />
+        <label className={`admin-upload-btn ${uploading ? 'uploading' : ''}`}>
+          {uploading ? (
+            <><span className="admin-loading-spinner-small" /> Mengupload...</>
+          ) : (
+            <><Upload size={16} /> Pilih Gambar</>
+          )}
+          <input type="file" accept="image/*" onChange={handleFile} hidden disabled={uploading} />
         </label>
-        <span className="admin-upload-hint">25KB — 1MB</span>
+        <span className="admin-upload-hint">Maks. 2MB • JPG, PNG, WebP, GIF, SVG, dll</span>
         {value && (
-          <button className="admin-upload-clear" onClick={() => { onClear(); setError(null); }} title="Hapus gambar">
+          <button className="admin-upload-clear" onClick={handleClear} title="Hapus gambar" disabled={uploading}>
             <Trash2 size={14} /> Hapus
           </button>
         )}
@@ -327,7 +355,7 @@ function OverviewTab({ content }) {
           <li>ℹ️ <strong>Tentang Kami:</strong> Edit profil guru, fasilitas, & galeri sekolah</li>
           <li>💬 <strong>Testimoni:</strong> Kelola testimoni wali murid (maks. {MAX_TESTIMONIALS})</li>
           <li>📸 <strong>Instagram Posts:</strong> Kelola link postingan Instagram dengan preview</li>
-          <li>⚠️ <strong>Upload:</strong> Ukuran gambar <strong>minimal 25KB, maksimal 1MB (1000KB)</strong></li>
+          <li>⚠️ <strong>Upload:</strong> Ukuran gambar <strong>maksimal 2MB</strong>. Support JPG, PNG, WebP, GIF, SVG, dll.</li>
           <li>Klik <strong>"Lihat Website"</strong> untuk melihat hasil perubahan</li>
         </ul>
       </div>
